@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { Send, X, MessageSquare, ChevronDown, ChevronUp, Utensils, ThumbsUp, ThumbsDown, Star } from "lucide-react"
+import { Send, X, MessageSquare, ChevronDown, ChevronUp, Utensils, ThumbsUp, ThumbsDown, Star, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -223,115 +223,112 @@ export function ChatBot() {
     setTimeout(handleSurveyClose, 2000)
   }
 
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen)
+  }
+
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      {!isChatOpen ? (
-        <Button
-          onClick={() => setIsChatOpen(true)}
-          className="rounded-full h-16 w-16 sm:h-20 sm:w-20 shadow-lg bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 transition-all duration-300 transform hover:scale-110 hover:rotate-3 hover:shadow-xl"
-        >
-          <MessageSquare className="h-12 w-12 sm:h-16 sm:w-16 text-white transition-transform group-hover:scale-110" />
-        </Button>
-      ) : (
-        <div className="relative">
-          {showSurvey && (
-            <Card className="w-[90vw] sm:w-[450px] max-w-[450px] shadow-xl animate-pop-in bg-white">
-              <CardContent className="p-6 space-y-6">
-                {!surveySubmitted ? (
-                  <>
-                    <div className="space-y-4">
-                      <div className="space-y-3">
-                        <h3 className="text-base font-medium text-gray-900">Você ficou satisfeito com o atendimento?</h3>
-                        <div className="flex gap-4">
-                          {[1, 2, 3, 4, 5].map((rating) => (
-                            <button
-                              key={rating}
-                              onClick={() => setSatisfactionRating(rating)}
-                              className={`h-10 w-10 rounded-full border ${
-                                satisfactionRating === rating
-                                  ? "border-blue-600 bg-blue-600 text-white"
-                                  : "border-gray-300 text-gray-600 hover:border-blue-600"
-                              } flex items-center justify-center text-sm transition-colors`}
-                            >
-                              {rating}
-                            </button>
-                          ))}
-                        </div>
-                        <div className="flex justify-between text-sm text-gray-600 px-2">
-                          <span>Insatisfeito</span>
-                          <span>Muito satisfeito</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <h3 className="text-base font-medium text-gray-900">Foi fácil utilizar o chat?</h3>
-                        <div className="flex justify-center gap-4">
-                          <button
-                            onClick={() => setEaseOfUseRating(0)}
-                            className={`flex items-center justify-center h-10 w-10 rounded-full border ${
-                              easeOfUseRating === 0
-                                ? "border-blue-600 bg-blue-600 text-white"
-                                : "border-gray-300 text-gray-600 hover:border-blue-600"
-                            } transition-colors`}
-                          >
-                            <ThumbsDown className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => setEaseOfUseRating(1)}
-                            className={`flex items-center justify-center h-10 w-10 rounded-full border ${
-                              easeOfUseRating === 1
-                                ? "border-blue-600 bg-blue-600 text-white"
-                                : "border-gray-300 text-gray-600 hover:border-blue-600"
-                            } transition-colors`}
-                          >
-                            <ThumbsUp className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <h3 className="text-base font-medium text-gray-900">Comentários adicionais (opcional)</h3>
-                        <textarea
-                          value={surveyFeedback}
-                          onChange={(e) => setSurveyFeedback(e.target.value)}
-                          className="w-full h-24 p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-none bg-white text-gray-900"
-                          placeholder="Compartilhe sua experiência ou sugestões..."
-                        />
-                      </div>
-
-                      <div className="flex justify-end gap-2 pt-2">
-                        <Button
-                          onClick={handleSurveyClose}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end space-y-4">
+      {showSurvey && (
+        <Card className="w-[90vw] sm:w-[450px] max-w-[450px] shadow-xl animate-pop-in bg-white">
+          <CardContent className="p-6 space-y-6">
+            {!surveySubmitted ? (
+              <>
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <h3 className="text-base font-medium text-gray-900">Você ficou satisfeito com o atendimento?</h3>
+                    <div className="flex gap-4">
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <button
+                          key={rating}
+                          onClick={() => setSatisfactionRating(rating)}
+                          className={`h-10 w-10 rounded-full border ${
+                            satisfactionRating === rating
+                              ? "border-blue-600 bg-blue-600 text-white"
+                              : "border-gray-300 text-gray-600 hover:border-blue-600"
+                          } flex items-center justify-center text-sm transition-colors`}
                         >
-                          Pular
-                        </Button>
-                        <Button
-                          onClick={handleSurveySubmit}
-                          disabled={!satisfactionRating || easeOfUseRating === null}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          Enviar Feedback
-                        </Button>
-                      </div>
+                          {rating}
+                        </button>
+                      ))}
                     </div>
-                  </>
-                ) : (
-                  <div className="text-center space-y-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h3 className="text-lg font-medium text-gray-900">Obrigado pelo seu feedback!</h3>
-                      <p className="text-gray-600">Sua opinião nos ajuda a melhorar cada vez mais.</p>
+                    <div className="flex justify-between text-sm text-gray-600 px-2">
+                      <span>Insatisfeito</span>
+                      <span>Muito satisfeito</span>
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-          {!showSurvey && (
+
+                  <div className="space-y-3">
+                    <h3 className="text-base font-medium text-gray-900">Foi fácil utilizar o chat?</h3>
+                    <div className="flex justify-center gap-4">
+                      <button
+                        onClick={() => setEaseOfUseRating(0)}
+                        className={`flex items-center justify-center h-10 w-10 rounded-full border ${
+                          easeOfUseRating === 0
+                            ? "border-blue-600 bg-blue-600 text-white"
+                            : "border-gray-300 text-gray-600 hover:border-blue-600"
+                        } transition-colors`}
+                      >
+                        <ThumbsDown className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => setEaseOfUseRating(1)}
+                        className={`flex items-center justify-center h-10 w-10 rounded-full border ${
+                          easeOfUseRating === 1
+                            ? "border-blue-600 bg-blue-600 text-white"
+                            : "border-gray-300 text-gray-600 hover:border-blue-600"
+                        } transition-colors`}
+                      >
+                        <ThumbsUp className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-base font-medium text-gray-900">Comentários adicionais (opcional)</h3>
+                    <textarea
+                      value={surveyFeedback}
+                      onChange={(e) => setSurveyFeedback(e.target.value)}
+                      className="w-full h-24 p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-none bg-white text-gray-900"
+                      placeholder="Compartilhe sua experiência ou sugestões..."
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button
+                      onClick={handleSurveyClose}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Pular
+                    </Button>
+                    <Button
+                      onClick={handleSurveySubmit}
+                      disabled={!satisfactionRating || easeOfUseRating === null}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Enviar Feedback
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center space-y-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-gray-900">Obrigado pelo seu feedback!</h3>
+                  <p className="text-gray-600">Sua opinião nos ajuda a melhorar cada vez mais.</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      {!showSurvey && (
+        <>
+          {isChatOpen && (
             <Card
               className={cn(
                 "w-[90vw] sm:w-[450px] max-w-[450px] shadow-xl transition-all duration-300",
-                isMinimized ? "h-16" : "h-[80vh] max-h-[600px]",
+                isMinimized ? "h-16" : "h-[80vh] sm:h-[600px]",
                 "bg-white flex flex-col"
               )}
             >
@@ -423,7 +420,17 @@ export function ChatBot() {
               )}
             </Card>
           )}
-        </div>
+          <Button
+            onClick={toggleChat}
+            className={cn(
+              "rounded-full h-16 w-16 shadow-lg bg-gradient-to-r from-blue-600 to-blue-800",
+              "hover:shadow-xl transition-all duration-300 hover:scale-105",
+              "flex items-center justify-center text-white"
+            )}
+          >
+            <MessageCircle className="h-8 w-8" />
+          </Button>
+        </>
       )}
     </div>
   )

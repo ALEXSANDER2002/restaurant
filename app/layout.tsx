@@ -15,6 +15,7 @@ import { ScrollToTop } from "@/components/scroll-to-top"
 import { SupabaseProvider } from "@/contexts/supabase-provider"
 import { NotificacaoTempoReal } from "@/components/notificacao-tempo-real"
 import { SincronizadorDados } from "@/components/sincronizador-dados"
+import { ChatBot } from "@/components/chat-bot"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -48,6 +49,7 @@ export default function RootLayout({
                     <Rodape />
                     <ScrollToTop />
                     <SincronizadorDados />
+                    <ChatBot />
                   </div>
                 </ProvedorAutenticacao>
               </SupabaseProvider>

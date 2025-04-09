@@ -143,12 +143,12 @@ export default function Home() {
               </p>
               <div className="flex gap-4">
                 <Link href="/entrar">
-                  <Button size="lg" className="bg-white text-[#1351B4] hover:bg-gray-100">
+                  <Button size="lg" className="bg-white text-[#1351B4] hover:bg-white/50 ">
                     Entrar
                   </Button>
                 </Link>
                 <Link href="/cardapio">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                  <Button size="lg" variant="outline" className="border-white text-[#1351B4] bg-white hover:bg-white/50">
                     Ver Cardápio
                   </Button>
                 </Link>
@@ -165,10 +165,10 @@ export default function Home() {
       <section className="py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-semibold text-gray-900 mb-4">
+            <h2 className="text-3xl font-semibold text-gray-900 mb-4 dark:text-white">
               Nossos Serviços
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto dark:text-white/50">
               Conheça as facilidades que oferecemos para tornar sua experiência
               mais agradável no restaurante universitário.
             </p>
@@ -219,17 +219,17 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gray-900 text-white py-24">
+      <section className=" text-black dark:text-white py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-semibold mb-6">
             Pronto para começar?
           </h2>
-          <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
             Faça seu cadastro agora e aproveite todas as facilidades do nosso sistema
             de compra de tickets para o restaurante universitário.
           </p>
           <Link href="/cadastro">
-            <Button size="lg" className="bg-[#1351B4] hover:bg-[#1351B4]/90">
+            <Button size="lg" className="border-white text-white bg-[#1351B4] dark:bg-white dark:text-[#1351B4] hover:bg-[#1351B4]/70 dark:hover:bg-gray-400">
               Criar Conta
             </Button>
           </Link>

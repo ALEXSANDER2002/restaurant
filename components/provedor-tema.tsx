@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"
-import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 import type { ThemeProviderProps } from "next-themes"
 
 type ModoTema = "claro" | "escuro" | "sistema"
@@ -17,11 +17,35 @@ interface ConfiguracoesTema {
 const ContextoTema = createContext<ConfiguracoesTema | undefined>(undefined)
 
 export function ProvedorTema({ children, ...props }: ThemeProviderProps) {
-  const [tema, setTema] = useState<ModoTema>("sistema")
+  return (
+      <NextThemesProvider attribute="class" defaultTheme="system" enableSystem {...props}>
+        <GerenciadorTema>{children}</GerenciadorTema>
+      </NextThemesProvider>
+  )
+}
+
+function GerenciadorTema({ children }: { children: React.ReactNode }) {
+  const { theme, setTheme } = useTheme()
   const [contraste, setContraste] = useState<ModoContraste>("normal")
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+
+    const temaArmazenado = localStorage.getItem("tema") as ModoTema | null
+    const contrasteArmazenado = localStorage.getItem("contraste") as ModoContraste | null
+
+    if (temaArmazenado) {
+      alterarTema(temaArmazenado)
+    }
+
+    if (contrasteArmazenado) {
+      alterarContraste(contrasteArmazenado)
+    }
+  }, [])
 
   const alterarTema = (novoTema: ModoTema) => {
-    setTema(novoTema)
+    setTheme(novoTema === "claro" ? "light" : novoTema === "escuro" ? "dark" : "system")
     localStorage.setItem("tema", novoTema)
   }
 
@@ -36,33 +60,24 @@ export function ProvedorTema({ children, ...props }: ThemeProviderProps) {
     }
   }
 
-  useEffect(() => {
-    const temaArmazenado = localStorage.getItem("tema") as ModoTema | null
-    const contrasteArmazenado = localStorage.getItem("contraste") as ModoContraste | null
-
-    if (temaArmazenado) {
-      setTema(temaArmazenado)
-    }
-
-    if (contrasteArmazenado) {
-      setContraste(contrasteArmazenado)
-      if (contrasteArmazenado === "alto") {
-        document.documentElement.classList.add("alto-contraste")
-      }
-    }
-  }, [])
+  if (!mounted) return null // ESSENCIAL: evita mismatch
 
   return (
-    <ContextoTema.Provider value={{ tema, alterarTema, contraste, alterarContraste }}>
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme={tema === "sistema" ? "system" : tema === "claro" ? "light" : "dark"}
-        enableSystem
-        {...props}
+      <ContextoTema.Provider
+          value={{
+            tema:
+                theme === "light"
+                    ? "claro"
+                    : theme === "dark"
+                        ? "escuro"
+                        : "sistema",
+            alterarTema,
+            contraste,
+            alterarContraste,
+          }}
       >
         {children}
-      </NextThemesProvider>
-    </ContextoTema.Provider>
+      </ContextoTema.Provider>
   )
 }
 
@@ -73,4 +88,3 @@ export const useTema = () => {
   }
   return contexto
 }
-

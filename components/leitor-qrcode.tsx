@@ -4,11 +4,10 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Camera, CameraOff, Loader2 } from "lucide-react"
-import { useAuth } from "@/contexts/auth-context"
 import { useIdioma } from "@/contexts/idioma-context"
 
 export function LeitorQRCode() {
-  const { entrarComQRCode, carregando: carregandoAuth } = useAuth()
+  // const { entrarComQRCode, carregando: carregandoAuth } = useAuth()
   const { t } = useIdioma()
   const [escaneando, setEscaneando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -110,11 +109,11 @@ export function LeitorQRCode() {
               })
             }
 
-            const { erro: erroLogin } = await entrarComQRCode(dadosQR)
+            // const { erro: erroLogin } = await entrarComQRCode(dadosQR)
 
-            if (erroLogin) {
-              setErro(erroLogin)
-            }
+            // if (erroLogin) {
+            //   setErro(erroLogin)
+            // }
           } catch (error) {
             console.error("Erro ao processar QR code:", error)
             setErro("QR Code com formato inválido")
@@ -163,7 +162,7 @@ export function LeitorQRCode() {
         type="button"
         className="w-full"
         onClick={escaneando ? pararEscaneamento : iniciarEscaneamento}
-        disabled={carregandoAuth || carregando}
+        disabled={carregando}
       >
         {escaneando ? (
           <>

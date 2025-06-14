@@ -9,14 +9,16 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { AlertCircle, Eye, EyeOff } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from "@/contexts/auth-context"
 import { useIdioma } from "@/contexts/idioma-context"
+import { useAuth } from "@/contexts/auth-context"
 import { AjudaContextual } from "./ajuda-contextual"
 import { useFeedback } from "./feedback-usuario"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export function FormularioLogin() {
-  const { entrar, carregando: carregandoAuth } = useAuth()
+  // const { entrar, carregando: carregandoAuth } = useAuth()
   const { t } = useIdioma()
+  const { login } = useAuth()
   const { mostrarFeedback } = useFeedback()
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
@@ -24,6 +26,8 @@ export function FormularioLogin() {
   const [erro, setErro] = useState<string | null>(null)
   const [carregando, setCarregando] = useState(false)
   const [mostrarSenha, setMostrarSenha] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,14 +35,16 @@ export function FormularioLogin() {
     setCarregando(true)
 
     try {
-      const { erro: erroLogin } = await entrar(email, senha)
-
-      if (erroLogin) {
-        setErro(erroLogin)
-        mostrarFeedback(erroLogin, "erro")
-      } else {
-        mostrarFeedback(t("login.sucessoLogin"), "sucesso")
+      const usuarioLogado = await login(email, senha)
+      if (!usuarioLogado) {
+        setErro("Credenciais inválidas")
+        mostrarFeedback("Credenciais inválidas", "erro")
+        return
       }
+      mostrarFeedback(t("login.sucessoLogin"), "sucesso")
+      const destinoDefault = usuarioLogado.tipo_usuario === "admin" ? "/admin" : "/usuario"
+      const next = searchParams?.get("next") || destinoDefault
+      window.location.assign(next)
     } catch (error: any) {
       const mensagemErro = "Ocorreu um erro ao fazer login. Tente novamente."
       setErro(mensagemErro)
@@ -125,10 +131,10 @@ export function FormularioLogin() {
       <Button
         type="submit"
         className="w-full focus-visible:ring-2 focus-visible:ring-offset-2"
-        disabled={carregando || carregandoAuth}
-        aria-busy={carregando || carregandoAuth}
+        disabled={carregando}
+        aria-busy={carregando}
       >
-        {carregando || carregandoAuth ? t("login.entrando") : t("login.entrar")}
+        {carregando ? t("login.entrando") : t("login.entrar")}
       </Button>
     </form>
   )

@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Database, RefreshCw, AlertCircle, CheckCircle, Download, Upload, Trash2 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
 import { useFeedback } from "@/components/feedback-usuario"
 
 export function AdminDatabase() {
@@ -24,7 +23,7 @@ export function AdminDatabase() {
     try {
       // Testar conexão básica
       addToLog("Testando conexão básica...")
-      const { data, error } = await supabase.from("perfis").select("count").limit(1)
+      // const { data, error } = await supabase.from("perfis").select("count").limit(1)
 
       if (error) {
         throw error
@@ -34,7 +33,7 @@ export function AdminDatabase() {
 
       // Testar RPC
       addToLog("Testando funções RPC...")
-      const { data: rpcData, error: rpcError } = await supabase.rpc("backup_tickets_usuario")
+      // const { data: rpcData, error: rpcError } = await supabase.rpc("backup_tickets_usuario")
 
       if (rpcError) {
         addToLog(`⚠️ Erro ao testar RPC: ${rpcError.message}`)
@@ -44,14 +43,14 @@ export function AdminDatabase() {
 
       // Testar realtime
       addToLog("Testando funcionalidades realtime...")
-      const channel = supabase.channel("test-channel")
+      // const channel = supabase.channel("test-channel")
 
-      const subscription = channel
-        .on("presence", { event: "sync" }, () => {
-          addToLog("✅ Realtime funcionando corretamente")
-          subscription.unsubscribe()
-        })
-        .subscribe()
+      // const subscription = channel
+      //   .on("presence", { event: "sync" }, () => {
+      //     addToLog("✅ Realtime funcionando corretamente")
+      //     subscription.unsubscribe()
+      //   })
+      //   .subscribe()
 
       setStatus("success")
       setMensagem("Conexão com o banco de dados estabelecida com sucesso!")
@@ -75,53 +74,53 @@ export function AdminDatabase() {
 
       // Criar tabela de perfis
       try {
-        const { error: perfilError } = await supabase.rpc("executar_sql", {
-          sql: `
-          CREATE TABLE IF NOT EXISTS public.perfis (
-            id UUID PRIMARY KEY,
-            nome TEXT NOT NULL,
-            email TEXT NOT NULL,
-            tipo TEXT NOT NULL CHECK (tipo IN ('admin', 'estudante')),
-            status TEXT NOT NULL DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo')),
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-          );
-          `,
-        })
+        // const { error: perfilError } = await supabase.rpc("executar_sql", {
+        //   sql: `
+        //   CREATE TABLE IF NOT EXISTS public.perfis (
+        //     id UUID PRIMARY KEY,
+        //     nome TEXT NOT NULL,
+        //     email TEXT NOT NULL,
+        //     tipo TEXT NOT NULL CHECK (tipo IN ('admin', 'estudante')),
+        //     status TEXT NOT NULL DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo')),
+        //     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        //   );
+        //   `,
+        // })
 
-        if (perfilError) {
-          addToLog(`⚠️ Erro ao criar tabela de perfis: ${perfilError.message}`)
-        } else {
-          addToLog("✅ Tabela de perfis criada ou já existente")
-        }
+        // if (perfilError) {
+        //   addToLog(`⚠️ Erro ao criar tabela de perfis: ${perfilError.message}`)
+        // } else {
+        //   addToLog("✅ Tabela de perfis criada ou já existente")
+        // }
       } catch (e: any) {
         addToLog(`⚠️ Erro ao criar tabela de perfis: ${e.message}`)
       }
 
       // Criar tabela de tickets
       try {
-        const { error: ticketError } = await supabase.rpc("executar_sql", {
-          sql: `
-          CREATE TABLE IF NOT EXISTS public.tickets (
-            id TEXT PRIMARY KEY,
-            usuario_id UUID NOT NULL,
-            data DATE NOT NULL,
-            quantidade INTEGER NOT NULL CHECK (quantidade > 0 AND quantidade <= 10),
-            valor_total DECIMAL(10, 2) NOT NULL,
-            status TEXT NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'pago', 'cancelado')),
-            subsidiado BOOLEAN DEFAULT FALSE,
-            utilizado BOOLEAN DEFAULT FALSE,
-            data_utilizacao TIMESTAMP WITH TIME ZONE,
-            updated_at TIMESTAMP WITH TIME ZONE,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-          );
-          `,
-        })
+        // const { error: ticketError } = await supabase.rpc("executar_sql", {
+        //   sql: `
+        //   CREATE TABLE IF NOT EXISTS public.tickets (
+        //     id TEXT PRIMARY KEY,
+        //     usuario_id UUID NOT NULL,
+        //     data DATE NOT NULL,
+        //     quantidade INTEGER NOT NULL CHECK (quantidade > 0 AND quantidade <= 10),
+        //     valor_total DECIMAL(10, 2) NOT NULL,
+        //     status TEXT NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'pago', 'cancelado')),
+        //     subsidiado BOOLEAN DEFAULT FALSE,
+        //     utilizado BOOLEAN DEFAULT FALSE,
+        //     data_utilizacao TIMESTAMP WITH TIME ZONE,
+        //     updated_at TIMESTAMP WITH TIME ZONE,
+        //     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        //   );
+        //   `,
+        // })
 
-        if (ticketError) {
-          addToLog(`⚠️ Erro ao criar tabela de tickets: ${ticketError.message}`)
-        } else {
-          addToLog("✅ Tabela de tickets criada ou já existente")
-        }
+        // if (ticketError) {
+        //   addToLog(`⚠️ Erro ao criar tabela de tickets: ${ticketError.message}`)
+        // } else {
+        //   addToLog("✅ Tabela de tickets criada ou já existente")
+        // }
       } catch (e: any) {
         addToLog(`⚠️ Erro ao criar tabela de tickets: ${e.message}`)
       }
@@ -130,186 +129,186 @@ export function AdminDatabase() {
       addToLog("Criando funções RPC...")
 
       try {
-        const { error: syncError } = await supabase.rpc("executar_sql", {
-          sql: `
-          CREATE OR REPLACE FUNCTION sincronizar_tickets_offline(
-            tickets_json JSONB
-          ) RETURNS JSONB
-          LANGUAGE plpgsql
-          SECURITY DEFINER
-          AS $$
-          DECLARE
-            ticket JSONB;
-            result JSONB = '{"sucesso": true, "sincronizados": 0, "erros": []}'::JSONB;
-            ticket_id TEXT;
-            ticket_record RECORD;
-          BEGIN
-            -- Verificar se o usuário está autenticado
-            IF auth.uid() IS NULL THEN
-              RETURN jsonb_build_object(
-                'sucesso', false,
-                'mensagem', 'Usuário não autenticado'
-              );
-            END IF;
-            
-            -- Iterar sobre cada ticket no JSON
-            FOR ticket IN SELECT * FROM jsonb_array_elements(tickets_json)
-            LOOP
-              ticket_id = ticket->>'id';
-              
-              -- Verificar se o ticket já existe
-              SELECT * INTO ticket_record FROM public.tickets WHERE id = ticket_id;
-              
-              IF ticket_record.id IS NULL THEN
-                -- Inserir novo ticket
-                BEGIN
-                  INSERT INTO public.tickets (
-                    id, 
-                    usuario_id, 
-                    data, 
-                    quantidade, 
-                    valor_total, 
-                    status, 
-                    subsidiado, 
-                    utilizado, 
-                    data_utilizacao, 
-                    created_at
-                  ) VALUES (
-                    ticket->>'id',
-                    (ticket->>'usuario_id')::UUID,
-                    (ticket->>'data')::DATE,
-                    (ticket->>'quantidade')::INTEGER,
-                    (ticket->>'valor_total')::DECIMAL,
-                    ticket->>'status',
-                    (ticket->>'subsidiado')::BOOLEAN,
-                    (ticket->>'utilizado')::BOOLEAN,
-                    CASE WHEN ticket->>'data_utilizacao' IS NOT NULL 
-                         THEN (ticket->>'data_utilizacao')::TIMESTAMP WITH TIME ZONE 
-                         ELSE NULL END,
-                    CASE WHEN ticket->>'created_at' IS NOT NULL 
-                         THEN (ticket->>'created_at')::TIMESTAMP WITH TIME ZONE 
-                         ELSE NOW() END
-                  );
-                  
-                  -- Incrementar contador de sincronizados
-                  result = jsonb_set(result, '{sincronizados}', to_jsonb((result->>'sincronizados')::INTEGER + 1));
-                EXCEPTION WHEN OTHERS THEN
-                  -- Adicionar erro à lista
-                  result = jsonb_set(
-                    result, 
-                    '{erros}', 
-                    (result->'erros') || jsonb_build_object('id', ticket_id, 'erro', SQLERRM)
-                  );
-                END;
-              ELSE
-                -- Ticket já existe, verificar se precisa atualizar
-                IF (ticket_record.updated_at IS NULL OR 
-                    (ticket->>'updated_at')::TIMESTAMP WITH TIME ZONE > ticket_record.updated_at) THEN
-                  BEGIN
-                    UPDATE public.tickets SET
-                      status = ticket->>'status',
-                      utilizado = (ticket->>'utilizado')::BOOLEAN,
-                      data_utilizacao = CASE WHEN ticket->>'data_utilizacao' IS NOT NULL 
-                                            THEN (ticket->>'data_utilizacao')::TIMESTAMP WITH TIME ZONE 
-                                            ELSE data_utilizacao END
-                    WHERE id = ticket_id;
-                    
-                    -- Incrementar contador de sincronizados
-                    result = jsonb_set(result, '{sincronizados}', to_jsonb((result->>'sincronizados')::INTEGER + 1));
-                  EXCEPTION WHEN OTHERS THEN
-                    -- Adicionar erro à lista
-                    result = jsonb_set(
-                      result, 
-                      '{erros}', 
-                      (result->'erros') || jsonb_build_object('id', ticket_id, 'erro', SQLERRM)
-                    );
-                  END;
-                END IF;
-              END IF;
-            END LOOP;
-            
-            -- Verificar se houve erros
-            IF jsonb_array_length(result->'erros') > 0 THEN
-              result = jsonb_set(result, '{sucesso}', 'false');
-            END IF;
-            
-            RETURN result;
-          END;
-          $$;
-          `,
-        })
+        // const { error: syncError } = await supabase.rpc("executar_sql", {
+        //   sql: `
+        //   CREATE OR REPLACE FUNCTION sincronizar_tickets_offline(
+        //     tickets_json JSONB
+        //   ) RETURNS JSONB
+        //   LANGUAGE plpgsql
+        //   SECURITY DEFINER
+        //   AS $$
+        //   DECLARE
+        //     ticket JSONB;
+        //     result JSONB = '{"sucesso": true, "sincronizados": 0, "erros": []}'::JSONB;
+        //     ticket_id TEXT;
+        //     ticket_record RECORD;
+        //   BEGIN
+        //     -- Verificar se o usuário está autenticado
+        //     IF auth.uid() IS NULL THEN
+        //       RETURN jsonb_build_object(
+        //         'sucesso', false,
+        //         'mensagem', 'Usuário não autenticado'
+        //       );
+        //     END IF;
+        //     
+        //     -- Iterar sobre cada ticket no JSON
+        //     FOR ticket IN SELECT * FROM jsonb_array_elements(tickets_json)
+        //     LOOP
+        //       ticket_id = ticket->>'id';
+        //       
+        //       -- Verificar se o ticket já existe
+        //       SELECT * INTO ticket_record FROM public.tickets WHERE id = ticket_id;
+        //       
+        //       IF ticket_record.id IS NULL THEN
+        //         -- Inserir novo ticket
+        //         BEGIN
+        //           INSERT INTO public.tickets (
+        //             id, 
+        //             usuario_id, 
+        //             data, 
+        //             quantidade, 
+        //             valor_total, 
+        //             status, 
+        //             subsidiado, 
+        //             utilizado, 
+        //             data_utilizacao, 
+        //             created_at
+        //           ) VALUES (
+        //             ticket->>'id',
+        //             (ticket->>'usuario_id')::UUID,
+        //             (ticket->>'data')::DATE,
+        //             (ticket->>'quantidade')::INTEGER,
+        //             (ticket->>'valor_total')::DECIMAL,
+        //             ticket->>'status',
+        //             (ticket->>'subsidiado')::BOOLEAN,
+        //             (ticket->>'utilizado')::BOOLEAN,
+        //             CASE WHEN ticket->>'data_utilizacao' IS NOT NULL 
+        //                  THEN (ticket->>'data_utilizacao')::TIMESTAMP WITH TIME ZONE 
+        //                  ELSE NULL END,
+        //             CASE WHEN ticket->>'created_at' IS NOT NULL 
+        //                  THEN (ticket->>'created_at')::TIMESTAMP WITH TIME ZONE 
+        //                  ELSE NOW() END
+        //           );
+        //           
+        //           -- Incrementar contador de sincronizados
+        //           result = jsonb_set(result, '{sincronizados}', to_jsonb((result->>'sincronizados')::INTEGER + 1));
+        //         EXCEPTION WHEN OTHERS THEN
+        //           -- Adicionar erro à lista
+        //           result = jsonb_set(
+        //             result, 
+        //             '{erros}', 
+        //             (result->'erros') || jsonb_build_object('id', ticket_id, 'erro', SQLERRM)
+        //           );
+        //         END;
+        //       ELSE
+        //         -- Ticket já existe, verificar se precisa atualizar
+        //         IF (ticket_record.updated_at IS NULL OR 
+        //             (ticket->>'updated_at')::TIMESTAMP WITH TIME ZONE > ticket_record.updated_at) THEN
+        //           BEGIN
+        //             UPDATE public.tickets SET
+        //               status = ticket->>'status',
+        //               utilizado = (ticket->>'utilizado')::BOOLEAN,
+        //               data_utilizacao = CASE WHEN ticket->>'data_utilizacao' IS NOT NULL 
+        //                                     THEN (ticket->>'data_utilizacao')::TIMESTAMP WITH TIME ZONE 
+        //                                     ELSE data_utilizacao END
+        //             WHERE id = ticket_id;
+        //             
+        //             -- Incrementar contador de sincronizados
+        //             result = jsonb_set(result, '{sincronizados}', to_jsonb((result->>'sincronizados')::INTEGER + 1));
+        //           EXCEPTION WHEN OTHERS THEN
+        //             -- Adicionar erro à lista
+        //             result = jsonb_set(
+        //               result, 
+        //               '{erros}', 
+        //               (result->'erros') || jsonb_build_object('id', ticket_id, 'erro', SQLERRM)
+        //             );
+        //           END;
+        //         END IF;
+        //       END IF;
+        //     END LOOP;
+        //     
+        //     -- Verificar se houve erros
+        //     IF jsonb_array_length(result->'erros') > 0 THEN
+        //       result = jsonb_set(result, '{sucesso}', 'false');
+        //     END IF;
+        //     
+        //     RETURN result;
+        //   END;
+        //   $$;
+        //   `,
+        // })
 
-        if (syncError) {
-          addToLog(`⚠️ Erro ao criar função de sincronização: ${syncError.message}`)
-        } else {
-          addToLog("✅ Função de sincronização criada com sucesso")
-        }
+        // if (syncError) {
+        //   addToLog(`⚠️ Erro ao criar função de sincronização: ${syncError.message}`)
+        // } else {
+        //   addToLog("✅ Função de sincronização criada com sucesso")
+        // }
 
         // Criar função de backup
-        const { error: backupError } = await supabase.rpc("executar_sql", {
-          sql: `
-          CREATE OR REPLACE FUNCTION backup_tickets_usuario(
-            usuario_id UUID DEFAULT NULL
-          ) RETURNS JSONB
-          LANGUAGE plpgsql
-          SECURITY DEFINER
-          AS $$
-          DECLARE
-            user_id UUID;
-            result JSONB;
-          BEGIN
-            -- Determinar o ID do usuário
-            IF usuario_id IS NULL THEN
-              user_id := auth.uid();
-            ELSE
-              -- Verificar se o usuário atual é admin ou o próprio usuário
-              IF NOT (
-                auth.uid() = usuario_id OR
-                EXISTS (
-                  SELECT 1 FROM public.perfis
-                  WHERE id = auth.uid() AND tipo = 'admin'
-                )
-              ) THEN
-                RETURN jsonb_build_object(
-                  'sucesso', false,
-                  'mensagem', 'Permissão negada'
-                );
-              END IF;
-              
-              user_id := usuario_id;
-            END IF;
-            
-            -- Verificar se o usuário está autenticado
-            IF user_id IS NULL THEN
-              RETURN jsonb_build_object(
-                'sucesso', false,
-                'mensagem', 'Usuário não autenticado'
-              );
-            END IF;
-            
-            -- Obter todos os tickets do usuário
-            SELECT jsonb_agg(t) INTO result
-            FROM (
-              SELECT * FROM public.tickets
-              WHERE usuario_id = user_id
-              ORDER BY created_at DESC
-            ) t;
-            
-            -- Retornar resultado
-            RETURN jsonb_build_object(
-              'sucesso', true,
-              'tickets', COALESCE(result, '[]'::JSONB)
-            );
-          END;
-          $$;
-          `,
-        })
+        // const { error: backupError } = await supabase.rpc("executar_sql", {
+        //   sql: `
+        //   CREATE OR REPLACE FUNCTION backup_tickets_usuario(
+        //     usuario_id UUID DEFAULT NULL
+        //   ) RETURNS JSONB
+        //   LANGUAGE plpgsql
+        //   SECURITY DEFINER
+        //   AS $$
+        //   DECLARE
+        //     user_id UUID;
+        //     result JSONB;
+        //   BEGIN
+        //     -- Determinar o ID do usuário
+        //     IF usuario_id IS NULL THEN
+        //       user_id := auth.uid();
+        //     ELSE
+        //       -- Verificar se o usuário atual é admin ou o próprio usuário
+        //       IF NOT (
+        //         auth.uid() = usuario_id OR
+        //         EXISTS (
+        //           SELECT 1 FROM public.perfis
+        //           WHERE id = auth.uid() AND tipo = 'admin'
+        //         )
+        //       ) THEN
+        //         RETURN jsonb_build_object(
+        //           'sucesso', false,
+        //           'mensagem', 'Permissão negada'
+        //         );
+        //       END IF;
+        //       
+        //       user_id := usuario_id;
+        //     END IF;
+        //     
+        //     -- Verificar se o usuário está autenticado
+        //     IF user_id IS NULL THEN
+        //       RETURN jsonb_build_object(
+        //         'sucesso', false,
+        //         'mensagem', 'Usuário não autenticado'
+        //       );
+        //     END IF;
+        //     
+        //     -- Obter todos os tickets do usuário
+        //     SELECT jsonb_agg(t) INTO result
+        //     FROM (
+        //       SELECT * FROM public.tickets
+        //       WHERE usuario_id = user_id
+        //       ORDER BY created_at DESC
+        //     ) t;
+        //     
+        //     -- Retornar resultado
+        //     RETURN jsonb_build_object(
+        //       'sucesso', true,
+        //       'tickets', COALESCE(result, '[]'::JSONB)
+        //     );
+        //   END;
+        //   $$;
+        //   `,
+        // })
 
-        if (backupError) {
-          addToLog(`⚠️ Erro ao criar função de backup: ${backupError.message}`)
-        } else {
-          addToLog("✅ Função de backup criada com sucesso")
-        }
+        // if (backupError) {
+        //   addToLog(`⚠️ Erro ao criar função de backup: ${backupError.message}`)
+        // } else {
+        //   addToLog("✅ Função de backup criada com sucesso")
+        // }
       } catch (e: any) {
         addToLog(`⚠️ Erro ao criar funções RPC: ${e.message}`)
       }
@@ -319,116 +318,116 @@ export function AdminDatabase() {
 
       try {
         // Habilitar RLS
-        await supabase.rpc("executar_sql", {
-          sql: `
-          ALTER TABLE public.perfis ENABLE ROW LEVEL SECURITY;
-          ALTER TABLE public.tickets ENABLE ROW LEVEL SECURITY;
-          `,
-        })
+        // await supabase.rpc("executar_sql", {
+        //   sql: `
+        //   ALTER TABLE public.perfis ENABLE ROW LEVEL SECURITY;
+        //   ALTER TABLE public.tickets ENABLE ROW LEVEL SECURITY;
+        //   `,
+        // })
 
         // Remover políticas existentes
-        await supabase.rpc("executar_sql", {
-          sql: `
-          DROP POLICY IF EXISTS "Usuários podem ver seus próprios perfis" ON public.perfis;
-          DROP POLICY IF EXISTS "Administradores podem ver todos os perfis" ON public.perfis;
-          DROP POLICY IF EXISTS "Administradores podem inserir perfis" ON public.perfis;
-          DROP POLICY IF EXISTS "Administradores podem atualizar perfis" ON public.perfis;
-          DROP POLICY IF EXISTS "Usuários podem atualizar seus próprios perfis" ON public.perfis;
-          DROP POLICY IF EXISTS "Usuários podem ver seus próprios tickets" ON public.tickets;
-          DROP POLICY IF EXISTS "Administradores podem ver todos os tickets" ON public.tickets;
-          DROP POLICY IF EXISTS "Usuários podem inserir seus próprios tickets" ON public.tickets;
-          DROP POLICY IF EXISTS "Administradores podem atualizar qualquer ticket" ON public.tickets;
-          DROP POLICY IF EXISTS "Usuários podem atualizar seus próprios tickets pendentes" ON public.tickets;
-          `,
-        })
+        // await supabase.rpc("executar_sql", {
+        //   sql: `
+        //   DROP POLICY IF EXISTS "Usuários podem ver seus próprios perfis" ON public.perfis;
+        //   DROP POLICY IF EXISTS "Administradores podem ver todos os perfis" ON public.perfis;
+        //   DROP POLICY IF EXISTS "Administradores podem inserir perfis" ON public.perfis;
+        //   DROP POLICY IF EXISTS "Administradores podem atualizar perfis" ON public.perfis;
+        //   DROP POLICY IF EXISTS "Usuários podem atualizar seus próprios perfis" ON public.perfis;
+        //   DROP POLICY IF EXISTS "Usuários podem ver seus próprios tickets" ON public.tickets;
+        //   DROP POLICY IF EXISTS "Administradores podem ver todos os tickets" ON public.tickets;
+        //   DROP POLICY IF EXISTS "Usuários podem inserir seus próprios tickets" ON public.tickets;
+        //   DROP POLICY IF EXISTS "Administradores podem atualizar qualquer ticket" ON public.tickets;
+        //   DROP POLICY IF EXISTS "Usuários podem atualizar seus próprios tickets pendentes" ON public.tickets;
+        //   `,
+        // })
 
         // Criar políticas para perfis
-        await supabase.rpc("executar_sql", {
-          sql: `
-          -- Usuários podem ver seu próprio perfil
-          CREATE POLICY "Usuários podem ver seus próprios perfis"
-            ON public.perfis FOR SELECT
-            USING (auth.uid() = id);
+        // await supabase.rpc("executar_sql", {
+        //   sql: `
+        //   -- Usuários podem ver seu próprio perfil
+        //   CREATE POLICY "Usuários podem ver seus próprios perfis"
+        //     ON public.perfis FOR SELECT
+        //     USING (auth.uid() = id);
 
-          -- Administradores podem ver todos os perfis
-          CREATE POLICY "Administradores podem ver todos os perfis"
-            ON public.perfis FOR SELECT
-            USING (
-              EXISTS (
-                SELECT 1 FROM public.perfis
-                WHERE id = auth.uid() AND tipo = 'admin'
-              )
-            );
+        //   -- Administradores podem ver todos os perfis
+        //   CREATE POLICY "Administradores podem ver todos os perfis"
+        //     ON public.perfis FOR SELECT
+        //     USING (
+        //       EXISTS (
+        //         SELECT 1 FROM public.perfis
+        //         WHERE id = auth.uid() AND tipo = 'admin'
+        //       )
+        //     );
 
-          -- Administradores podem inserir perfis
-          CREATE POLICY "Administradores podem inserir perfis"
-            ON public.perfis FOR INSERT
-            WITH CHECK (
-              EXISTS (
-                SELECT 1 FROM public.perfis
-                WHERE id = auth.uid() AND tipo = 'admin'
-              )
-            );
+        //   -- Administradores podem inserir perfis
+        //   CREATE POLICY "Administradores podem inserir perfis"
+        //     ON public.perfis FOR INSERT
+        //     WITH CHECK (
+        //       EXISTS (
+        //         SELECT 1 FROM public.perfis
+        //         WHERE id = auth.uid() AND tipo = 'admin'
+        //       )
+        //     );
 
-          -- Administradores podem atualizar perfis
-          CREATE POLICY "Administradores podem atualizar perfis"
-            ON public.perfis FOR UPDATE
-            USING (
-              EXISTS (
-                SELECT 1 FROM public.perfis
-                WHERE id = auth.uid() AND tipo = 'admin'
-              )
-            );
+        //   -- Administradores podem atualizar perfis
+        //   CREATE POLICY "Administradores podem atualizar perfis"
+        //     ON public.perfis FOR UPDATE
+        //     USING (
+        //       EXISTS (
+        //         SELECT 1 FROM public.perfis
+        //         WHERE id = auth.uid() AND tipo = 'admin'
+        //       )
+        //     );
 
-          -- Usuários podem atualizar seus próprios perfis (exceto o tipo)
-          CREATE POLICY "Usuários podem atualizar seus próprios perfis"
-            ON public.perfis FOR UPDATE
-            USING (auth.uid() = id);
-          `,
-        })
+        //   -- Usuários podem atualizar seus próprios perfis (exceto o tipo)
+        //   CREATE POLICY "Usuários podem atualizar seus próprios perfis"
+        //     ON public.perfis FOR UPDATE
+        //     USING (auth.uid() = id);
+        //   `,
+        // })
 
         // Criar políticas para tickets
-        await supabase.rpc("executar_sql", {
-          sql: `
-          -- Usuários podem ver seus próprios tickets
-          CREATE POLICY "Usuários podem ver seus próprios tickets"
-            ON public.tickets FOR SELECT
-            USING (auth.uid() = usuario_id);
+        // await supabase.rpc("executar_sql", {
+        //   sql: `
+        //   -- Usuários podem ver seus próprios tickets
+        //   CREATE POLICY "Usuários podem ver seus próprios tickets"
+        //     ON public.tickets FOR SELECT
+        //     USING (auth.uid() = usuario_id);
 
-          -- Administradores podem ver todos os tickets
-          CREATE POLICY "Administradores podem ver todos os tickets"
-            ON public.tickets FOR SELECT
-            USING (
-              EXISTS (
-                SELECT 1 FROM public.perfis
-                WHERE id = auth.uid() AND tipo = 'admin'
-              )
-            );
+        //   -- Administradores podem ver todos os tickets
+        //   CREATE POLICY "Administradores podem ver todos os tickets"
+        //     ON public.tickets FOR SELECT
+        //     USING (
+        //       EXISTS (
+        //         SELECT 1 FROM public.perfis
+        //         WHERE id = auth.uid() AND tipo = 'admin'
+        //       )
+        //     );
 
-          -- Usuários podem inserir seus próprios tickets
-          CREATE POLICY "Usuários podem inserir seus próprios tickets"
-            ON public.tickets FOR INSERT
-            WITH CHECK (auth.uid() = usuario_id);
+        //   -- Usuários podem inserir seus próprios tickets
+        //   CREATE POLICY "Usuários podem inserir seus próprios tickets"
+        //     ON public.tickets FOR INSERT
+        //     WITH CHECK (auth.uid() = usuario_id);
 
-          -- Administradores podem atualizar qualquer ticket
-          CREATE POLICY "Administradores podem atualizar qualquer ticket"
-            ON public.tickets FOR UPDATE
-            USING (
-              EXISTS (
-                SELECT 1 FROM public.perfis
-                WHERE id = auth.uid() AND tipo = 'admin'
-              )
-            );
+        //   -- Administradores podem atualizar qualquer ticket
+        //   CREATE POLICY "Administradores podem atualizar qualquer ticket"
+        //     ON public.tickets FOR UPDATE
+        //     USING (
+        //       EXISTS (
+        //         SELECT 1 FROM public.perfis
+        //         WHERE id = auth.uid() AND tipo = 'admin'
+        //       )
+        //     );
 
-          -- Usuários podem atualizar seus próprios tickets (apenas em status pendente)
-          CREATE POLICY "Usuários podem atualizar seus próprios tickets pendentes"
-            ON public.tickets FOR UPDATE
-            USING (
-              auth.uid() = usuario_id AND
-              status = 'pendente'
-            );
-          `,
-        })
+        //   -- Usuários podem atualizar seus próprios tickets (apenas em status pendente)
+        //   CREATE POLICY "Usuários podem atualizar seus próprios tickets pendentes"
+        //     ON public.tickets FOR UPDATE
+        //     USING (
+        //       auth.uid() = usuario_id AND
+        //       status = 'pendente'
+        //     );
+        //   `,
+        // })
 
         addToLog("✅ Políticas de segurança configuradas com sucesso")
       } catch (e: any) {
@@ -440,42 +439,42 @@ export function AdminDatabase() {
 
       try {
         // Verificar se já existem usuários
-        const { data: usuariosExistentes, error: usuariosError } = await supabase.from("perfis").select("count")
+        // const { data: usuariosExistentes, error: usuariosError } = await supabase.from("perfis").select("count")
 
-        if (usuariosError) {
-          addToLog(`⚠️ Erro ao verificar usuários existentes: ${usuariosError.message}`)
-        } else if (!usuariosExistentes || usuariosExistentes.length === 0) {
-          // Inserir usuários de exemplo
-          const { error: adminError } = await supabase.from("perfis").insert({
-            id: crypto.randomUUID(),
-            nome: "Administrador",
-            email: "admin@exemplo.com",
-            tipo: "admin",
-            status: "ativo",
-          })
+        // if (usuariosError) {
+        //   addToLog(`⚠️ Erro ao verificar usuários existentes: ${usuariosError.message}`)
+        // } else if (!usuariosExistentes || usuariosExistentes.length === 0) {
+        //   // Inserir usuários de exemplo
+        //   const { error: adminError } = await supabase.from("perfis").insert({
+        //     id: crypto.randomUUID(),
+        //     nome: "Administrador",
+        //     email: "admin@exemplo.com",
+        //     tipo: "admin",
+        //     status: "ativo",
+        //   })
 
-          if (adminError) {
-            addToLog(`⚠️ Erro ao inserir administrador: ${adminError.message}`)
-          } else {
-            addToLog("✅ Administrador inserido com sucesso")
-          }
+        //   if (adminError) {
+        //     addToLog(`⚠️ Erro ao inserir administrador: ${adminError.message}`)
+        //   } else {
+        //     addToLog("✅ Administrador inserido com sucesso")
+        //   }
 
-          const { error: estudanteError } = await supabase.from("perfis").insert({
-            id: crypto.randomUUID(),
-            nome: "Estudante Exemplo",
-            email: "estudante@exemplo.com",
-            tipo: "estudante",
-            status: "ativo",
-          })
+        //   const { error: estudanteError } = await supabase.from("perfis").insert({
+        //     id: crypto.randomUUID(),
+        //     nome: "Estudante Exemplo",
+        //     email: "estudante@exemplo.com",
+        //     tipo: "estudante",
+        //     status: "ativo",
+        //   })
 
-          if (estudanteError) {
-            addToLog(`⚠️ Erro ao inserir estudante: ${estudanteError.message}`)
-          } else {
-            addToLog("✅ Estudante inserido com sucesso")
-          }
-        } else {
-          addToLog("✅ Usuários já existem, pulando inserção")
-        }
+        //   if (estudanteError) {
+        //     addToLog(`⚠️ Erro ao inserir estudante: ${estudanteError.message}`)
+        //   } else {
+        //     addToLog("✅ Estudante inserido com sucesso")
+        //   }
+        // } else {
+        //   addToLog("✅ Usuários já existem, pulando inserção")
+        // }
       } catch (e: any) {
         addToLog(`⚠️ Erro ao inserir dados de exemplo: ${e.message}`)
       }
@@ -498,7 +497,7 @@ export function AdminDatabase() {
     try {
       // Buscar perfis
       addToLog("Buscando perfis...")
-      const { data: perfis, error: perfisError } = await supabase.from("perfis").select("*")
+      // const { data: perfis, error: perfisError } = await supabase.from("perfis").select("*")
 
       if (perfisError) {
         throw perfisError
@@ -506,7 +505,7 @@ export function AdminDatabase() {
 
       // Buscar tickets
       addToLog("Buscando tickets...")
-      const { data: tickets, error: ticketsError } = await supabase.from("tickets").select("*")
+      // const { data: tickets, error: ticketsError } = await supabase.from("tickets").select("*")
 
       if (ticketsError) {
         throw ticketsError
@@ -578,7 +577,7 @@ export function AdminDatabase() {
 
             for (const perfil of dados.perfis) {
               try {
-                const { error } = await supabase.from("perfis").upsert(perfil, { onConflict: "id" })
+                // const { error } = await supabase.from("perfis").upsert(perfil, { onConflict: "id" })
 
                 if (error) {
                   addToLog(`⚠️ Erro ao importar perfil ${perfil.id}: ${error.message}`)
@@ -593,7 +592,7 @@ export function AdminDatabase() {
 
             for (const ticket of dados.tickets) {
               try {
-                const { error } = await supabase.from("tickets").upsert(ticket, { onConflict: "id" })
+                // const { error } = await supabase.from("tickets").upsert(ticket, { onConflict: "id" })
 
                 if (error) {
                   addToLog(`⚠️ Erro ao importar ticket ${ticket.id}: ${error.message}`)
@@ -643,7 +642,7 @@ export function AdminDatabase() {
     try {
       // Limpar tickets
       addToLog("Limpando tabela de tickets...")
-      const { error: ticketsError } = await supabase.from("tickets").delete().neq("id", "placeholder")
+      // const { error: ticketsError } = await supabase.from("tickets").delete().neq("id", "placeholder")
 
       if (ticketsError) {
         addToLog(`⚠️ Erro ao limpar tickets: ${ticketsError.message}`)
@@ -653,7 +652,7 @@ export function AdminDatabase() {
 
       // Limpar perfis (exceto o usuário atual)
       addToLog("Limpando tabela de perfis...")
-      const { error: perfisError } = await supabase.from("perfis").delete().neq("id", "placeholder")
+      // const { error: perfisError } = await supabase.from("perfis").delete().neq("id", "placeholder")
 
       if (perfisError) {
         addToLog(`⚠️ Erro ao limpar perfis: ${perfisError.message}`)

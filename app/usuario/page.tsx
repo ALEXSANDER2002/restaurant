@@ -1,68 +1,103 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ComprarTicketSincronizado } from "@/components/comprar-ticket-sincronizado"
-import { HistoricoComprasSincronizado } from "@/components/historico-compras-sincronizado"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProtecaoRota } from "@/components/protecao-rota"
+import { buscarTicketsUsuario } from "@/services/ticket-sync-service"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { format, parseISO } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import { useAuth } from "@/contexts/auth-context"
 
-export default function PaginaUsuario() {
+export default function UsuarioPage() {
+  const { usuario, carregando: carregandoSessao } = useAuth()
+
+  const usuarioId = usuario?.id || null
+
+  const [tickets, setTickets] = useState<any[]>([])
+  const [carregando, setCarregando] = useState(true)
+
+  useEffect(() => {
+    if (!usuarioId) return
+
+    const fetchTickets = async () => {
+      try {
+        const { tickets } = await buscarTicketsUsuario(usuarioId)
+        setTickets(tickets)
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setCarregando(false)
+      }
+    }
+    fetchTickets()
+  }, [usuarioId])
+
   return (
-    <ProtecaoRota tipoPermitido="usuario">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Painel do Estudante</h1>
+    <ProtecaoRota>
+      <Tabs defaultValue="comprar" className="w-full max-w-3xl mx-auto py-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="comprar">Comprar Ticket</TabsTrigger>
+          <TabsTrigger value="historico">Histórico</TabsTrigger>
+        </TabsList>
 
-        <Tabs defaultValue="comprar" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="comprar">Comprar Ticket</TabsTrigger>
-            <TabsTrigger value="historico">Histórico</TabsTrigger>
-            <TabsTrigger value="configuracoes">Configurações</TabsTrigger>
-          </TabsList>
+        <TabsContent value="comprar">
+          <Card>
+            <CardHeader>
+              <CardTitle>Comprar ticket</CardTitle>
+              <CardDescription>Selecione data, quantidade e finalize a compra.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ComprarTicketSincronizado />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="comprar">
+        <TabsContent value="historico">
+          {!usuarioId ? (
+            <p className="text-muted-foreground py-10">Faça login para visualizar seus tickets.</p>
+          ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Comprar Ticket de Almoço</CardTitle>
-                <CardDescription>Adquira seu ticket para o almoço no Restaurante Universitário</CardDescription>
+                <CardTitle>Histórico de compras</CardTitle>
+                <CardDescription>Veja seus tickets adquiridos.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ComprarTicketSincronizado />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="historico">
-            <Card>
-              <CardHeader>
-                <CardTitle>Histórico de Compras</CardTitle>
-                <CardDescription>Visualize suas compras anteriores</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <HistoricoComprasSincronizado />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="configuracoes">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações da Conta</CardTitle>
-                <CardDescription>Gerencie suas preferências e configurações de acessibilidade</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">Preferências de Notificação</h3>
-                    {/* Conteúdo de configurações */}
+                {carregando ? (
+                  <p>Carregando...</p>
+                ) : tickets.length === 0 ? (
+                  <p className="text-muted-foreground">Nenhum ticket encontrado.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Data</TableHead>
+                          <TableHead>Quantidade</TableHead>
+                          <TableHead>Valor</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {tickets.map((t) => (
+                          <TableRow key={t.id}>
+                            <TableCell>{format(parseISO(t.data), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
+                            <TableCell>{t.quantidade}</TableCell>
+                            <TableCell>R$ {t.valor_total.toFixed(2)}</TableCell>
+                            <TableCell>{t.status}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">Acessibilidade</h3>
-                    {/* Conteúdo de acessibilidade */}
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </ProtecaoRota>
   )
 }

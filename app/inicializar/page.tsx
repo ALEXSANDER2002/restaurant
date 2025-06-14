@@ -1,6 +1,4 @@
-import InicializarUsuarios from "@/components/inicializar-usuarios"
-
-export default function PaginaInicializar() {
-  return <InicializarUsuarios />
+export default function InicializarPage() {
+  return <div>Página de inicialização removida. Não há mais Supabase.</div>
 }
 

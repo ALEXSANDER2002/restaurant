@@ -1,4 +1,6 @@
-import { supabase } from "@/lib/supabase"
+import { db } from "@/lib/drizzle"
+import { tickets, perfis } from "@/lib/drizzle/schema"
+import { eq, and, desc, gte, sql } from "drizzle-orm"
 
 export interface Ticket {
   id: string
@@ -35,32 +37,10 @@ export async function comprarTicket(
       created_at: new Date().toISOString(),
     }
 
-    // Inserir no Supabase
-    try {
-      const { data: ticket, error } = await supabase.from("tickets").insert(novoTicket).select().single()
+    // Inserir via Drizzle
+    const [ticket] = await db.insert(tickets).values(novoTicket).returning()
 
-      if (error) {
-        throw error
-      }
-
-      return { ticket, erro: null }
-    } catch (error) {
-      console.error("Erro Supabase:", error)
-
-      // Adicionar à fila de sincronização
-      // @ts-ignore
-      if (window.adicionarTicketParaSincronizacao) {
-        // @ts-ignore
-        window.adicionarTicketParaSincronizacao(novoTicket)
-      }
-
-      // Fallback para armazenamento local
-      const ticketsExistentes = JSON.parse(localStorage.getItem("tickets") || "[]")
-      ticketsExistentes.push(novoTicket)
-      localStorage.setItem("tickets", JSON.stringify(ticketsExistentes))
-
-      return { ticket: novoTicket, erro: null }
-    }
+    return { ticket, erro: null }
   } catch (error: any) {
     console.error("Erro ao comprar ticket:", error)
     return { ticket: null, erro: error.message }
@@ -70,26 +50,8 @@ export async function comprarTicket(
 // Atualizar a função buscarTicketsUsuario para tentar primeiro o Supabase
 export async function buscarTicketsUsuario(usuarioId: string) {
   try {
-    // Tentar buscar do Supabase primeiro
-    try {
-      const { data, error } = await supabase
-        .from("tickets")
-        .select("*")
-        .eq("usuario_id", usuarioId)
-        .order("created_at", { ascending: false })
-
-      if (!error) {
-        return { tickets: data || [], erro: null }
-      }
-    } catch (e) {
-      console.warn("Erro ao buscar tickets do Supabase:", e)
-    }
-
-    // Fallback para localStorage
-    const todosTickets = JSON.parse(localStorage.getItem("tickets") || "[]")
-    const ticketsDoUsuario = todosTickets.filter((ticket: any) => ticket.usuario_id === usuarioId)
-
-    return { tickets: ticketsDoUsuario, erro: null }
+    const lista = await db.select().from(tickets).where(eq(tickets.usuario_id, usuarioId)).orderBy(desc(tickets.created_at))
+    return { tickets: lista, erro: null }
   } catch (error: any) {
     console.error("Erro ao buscar tickets:", error)
     return { tickets: [], erro: error.message }
@@ -98,32 +60,17 @@ export async function buscarTicketsUsuario(usuarioId: string) {
 
 export async function buscarTodosTickets() {
   try {
-    // Try to get data from Supabase first
-    try {
-      const { data, error } = await supabase
-        .from("tickets")
-        .select(`
-          *,
-          perfis (nome, email)
-        `)
-        .order("created_at", { ascending: false })
+    const rows = await db
+      .select({
+        ...tickets,
+        nome: perfis.nome,
+        email: perfis.email,
+      })
+      .from(tickets)
+      .leftJoin(perfis, eq(perfis.id, tickets.usuario_id))
+      .orderBy(desc(tickets.created_at))
 
-      if (error) {
-        throw error
-      }
-
-      return { tickets: data || [], erro: null }
-    } catch (error: any) {
-      // If there's an error with Supabase, check if it's the recursion error
-      console.warn("Erro ao buscar tickets do Supabase:", error)
-
-      if (error.message && error.message.includes("infinite recursion")) {
-        console.log("Detectado erro de recursão infinita, usando dados simulados")
-        return { tickets: gerarTicketsSimulados(), erro: null }
-      }
-
-      throw error
-    }
+    return { tickets: rows, erro: null }
   } catch (error: any) {
     console.error("Erro ao buscar todos os tickets:", error)
     // Return mock data as fallback
@@ -135,38 +82,11 @@ export async function buscarTodosTickets() {
 export async function atualizarStatusTicket(ticketId: string, status: "pago" | "pendente" | "cancelado") {
   try {
     // Tentar atualizar no Supabase primeiro
-    try {
-      const { data, error } = await supabase.from("tickets").update({ status }).eq("id", ticketId).select().single()
-
-      if (!error) {
-        return { ticket: data, erro: null }
-      }
-    } catch (e) {
-      console.warn("Erro ao atualizar status no Supabase:", e)
-    }
-
-    // Fallback para localStorage
-    const tickets = JSON.parse(localStorage.getItem("tickets") || "[]")
-    const ticketIndex = tickets.findIndex((t: any) => t.id === ticketId)
-
-    if (ticketIndex !== -1) {
-      tickets[ticketIndex].status = status
-      localStorage.setItem("tickets", JSON.stringify(tickets))
-
-      // Adicionar à fila de sincronização
-      // @ts-ignore
-      if (window.adicionarTicketParaSincronizacao) {
-        // @ts-ignore
-        window.adicionarTicketParaSincronizacao(tickets[ticketIndex])
-      }
-
-      return { ticket: tickets[ticketIndex], erro: null }
-    }
-
-    return { ticket: null, erro: "Ticket não encontrado" }
-  } catch (error: any) {
-    console.error("Erro ao atualizar status do ticket:", error)
-    return { ticket: null, erro: error.message }
+    const [updated] = await db.update(tickets).set({ status }).where(eq(tickets.id, ticketId)).returning()
+    return { ticket: updated, erro: null }
+  } catch (e) {
+    console.warn("Erro ao atualizar status no banco:", e)
+    return { ticket: null, erro: "Erro ao atualizar status do ticket" }
   }
 }
 
@@ -178,11 +98,14 @@ export async function buscarEstatisticasVendas() {
       const dataHoje = new Date()
       dataHoje.setHours(0, 0, 0, 0)
 
-      const { data: dadosDiarios, error: erroDiario } = await supabase
-        .from("tickets")
-        .select("created_at, quantidade, valor_total")
-        .gte("created_at", dataHoje.toISOString())
-        .eq("status", "pago")
+      const { data: dadosDiarios, error: erroDiario } = await db
+        .select({
+          created_at: tickets.created_at,
+          quantidade: tickets.quantidade,
+          valor_total: tickets.valor_total,
+        })
+        .from(tickets)
+        .where(and(eq(tickets.status, "pago"), gte(tickets.created_at, dataHoje.toISOString())))
 
       if (erroDiario) {
         throw erroDiario
@@ -192,11 +115,14 @@ export async function buscarEstatisticasVendas() {
       const dataInicioSemana = new Date()
       dataInicioSemana.setDate(dataInicioSemana.getDate() - 7)
 
-      const { data: dadosSemanais, error: erroSemanal } = await supabase
-        .from("tickets")
-        .select("created_at, quantidade, valor_total")
-        .gte("created_at", dataInicioSemana.toISOString())
-        .eq("status", "pago")
+      const { data: dadosSemanais, error: erroSemanal } = await db
+        .select({
+          created_at: tickets.created_at,
+          quantidade: tickets.quantidade,
+          valor_total: tickets.valor_total,
+        })
+        .from(tickets)
+        .where(and(eq(tickets.status, "pago"), gte(tickets.created_at, dataInicioSemana.toISOString())))
 
       if (erroSemanal) {
         throw erroSemanal

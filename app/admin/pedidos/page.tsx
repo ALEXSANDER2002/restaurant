@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ListaPedidosSincronizada } from "@/components/lista-pedidos-sincronizada"
+import { ListaPedidos } from "@/components/lista-pedidos"
 import { ProtecaoRota } from "@/components/protecao-rota"
 
 export default function PaginaPedidos() {
@@ -14,7 +14,7 @@ export default function PaginaPedidos() {
             <CardDescription>Gerencie os pedidos realizados pelos estudantes</CardDescription>
           </CardHeader>
           <CardContent>
-            <ListaPedidosSincronizada />
+            <ListaPedidos />
           </CardContent>
         </Card>
       </div>

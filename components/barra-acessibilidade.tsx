@@ -2,12 +2,17 @@
 
 import { Button } from "@/components/ui/button"
 import { useTema } from "./provedor-tema"
-import { Moon, Sun, Eye } from "lucide-react"
+import { Moon, Sun, Eye, Accessibility } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useIdioma } from "@/contexts/idioma-context"
 
-// Adicione estas importações
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
 export function BarraAcessibilidade() {
@@ -30,98 +35,61 @@ export function BarraAcessibilidade() {
     }
   }, [vLibrasCarregado])
 
-  // Substitua o return pela versão melhorada
+  // Novo botão flutuante com menu dropdown
   return (
-    <div
-      className="bg-primary/90 text-primary-foreground py-2 backdrop-blur-sm border-b border-primary/20"
-      role="region"
-      aria-label="Barra de acessibilidade"
-    >
-      <div className="container mx-auto px-4 flex justify-between items-center">
-        <TooltipProvider delayDuration={300}>
-          <div className="flex gap-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => alterarContraste(contraste === "normal" ? "alto" : "normal")}
-                  aria-pressed={contraste === "alto"}
-                  aria-label={t("acessibilidade.altoContraste")}
-                  className={cn(
-                    "rounded-md hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white",
-                    contraste === "alto" && "bg-white/20",
-                  )}
-                >
-                  <Eye className={cn("h-4 w-4 mr-2", contraste === "alto" && "text-yellow-300")} />
-                  <span className="sr-only md:not-sr-only text-sm">{t("acessibilidade.altoContraste")}</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>{contraste === "normal" ? "Ativar" : "Desativar"} alto contraste</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => alterarTema(tema === "claro" ? "escuro" : "claro")}
-                  aria-pressed={tema === "escuro"}
-                  aria-label={tema === "claro" ? t("acessibilidade.modoEscuro") : t("acessibilidade.modoClaro")}
-                  className={cn(
-                    "rounded-md hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white",
-                    tema === "escuro" && "bg-white/20",
-                  )}
-                >
-                  {tema === "claro" ? (
-                    <>
-                      <Moon className="h-4 w-4 mr-2" />
-                      <span className="sr-only md:not-sr-only text-sm">{t("acessibilidade.modoEscuro")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sun className="h-4 w-4 mr-2" />
-                      <span className="sr-only md:not-sr-only text-sm">{t("acessibilidade.modoClaro")}</span>
-                    </>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Alternar para modo {tema === "claro" ? "escuro" : "claro"}</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div id="vlibras-btn">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label={t("acessibilidade.vlibras")}
-                    className="vw-access-button rounded-md hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white"
-                  >
-                    <span className="sr-only md:not-sr-only text-sm">{t("acessibilidade.vlibras")}</span>
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Tradutor de Libras</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
-
-        <div className="text-sm">
-          <a
-            href="#conteudo-principal"
-            className="underline hover:text-white/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded px-2 py-1 transition-colors"
-          >
-            {t("acessibilidade.irConteudo")}
-          </a>
-        </div>
+    <div className="bg-white border-b border-gray-200 text-gray-800 text-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="default"
+              size="sm"
+              className="flex items-center gap-1 bg-[#1351B4] hover:bg-[#0B2F67] text-white border-0"
+            >
+              <Accessibility className="h-4 w-4" />
+              <span className="font-medium hidden sm:inline">Acessibilidade</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent sideOffset={6} align="start">
+            <DropdownMenuItem
+              onSelect={() => alterarContraste(contraste === "normal" ? "alto" : "normal")}
+            >
+              <Eye className="h-4 w-4" />
+              <span>{t("acessibilidade.altoContraste")}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => alterarTema(tema === "claro" ? "escuro" : "claro")}>
+              {tema === "claro" ? (
+                <>
+                  <Moon className="h-4 w-4" />
+                  <span>{t("acessibilidade.modoEscuro")}</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="h-4 w-4" />
+                  <span>{t("acessibilidade.modoClaro")}</span>
+                </>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={() => {
+                const el = document.getElementById("vlibras-btn")
+                el?.click()
+              }}
+            >
+              <Eye className="h-4 w-4" />
+              <span>{t("acessibilidade.vlibras")}</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <a href="#conteudo-principal">{t("acessibilidade.irConteudo")}</a>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <p className="hidden md:block text-[12px] text-gray-500">Alt + 1 (conteúdo), Alt + 4 (contraste)</p>
       </div>
+      {/* Botão invisível usado pela biblioteca VLibras */}
+      <div id="vlibras-btn" className="hidden" />
     </div>
   )
 }

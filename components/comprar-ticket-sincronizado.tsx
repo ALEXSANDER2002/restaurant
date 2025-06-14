@@ -14,13 +14,11 @@ import { ptBR } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckCircle2 } from "lucide-react"
-import { useAuth } from "@/contexts/auth-context"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { TicketQRCode } from "./ticket-qrcode"
-import { salvarTicket, generateTicketId } from "@/services/ticket-sync-service"
-import { useRealtimeSync } from "@/hooks/use-realtime-sync"
 import { useFeedback } from "@/components/feedback-usuario"
+import { generateTicketId, salvarTicket } from "@/services/ticket-sync-service"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { TicketQRCode } from "@/components/ticket-qrcode"
 
 // Define ticket types and their prices
 const TICKET_TYPES = {
@@ -37,7 +35,7 @@ const TICKET_TYPES = {
 }
 
 export function ComprarTicketSincronizado() {
-  const { usuario, perfil } = useAuth()
+  // const { usuario, perfil } = useAuth()
   const { mostrarFeedback } = useFeedback()
   const [data, setData] = useState<Date | undefined>(undefined)
   const [quantidade, setQuantidade] = useState(1)
@@ -47,19 +45,6 @@ export function ComprarTicketSincronizado() {
   const [erro, setErro] = useState<string | null>(null)
   const [ticketComprado, setTicketComprado] = useState<any>(null)
 
-  // Configurar sincronização em tempo real
-  useRealtimeSync({
-    table: "tickets",
-    event: "INSERT",
-    showNotifications: false,
-    onInsert: (payload) => {
-      // Verificar se o ticket inserido é do usuário atual
-      if (payload.new && payload.new.usuario_id === perfil?.id) {
-        console.log("Novo ticket detectado:", payload.new)
-      }
-    },
-  })
-
   // Get price based on selected ticket type
   const precoUnitario = TICKET_TYPES[tipoTicket].price
   const precoTotal = quantidade * precoUnitario
@@ -67,10 +52,10 @@ export function ComprarTicketSincronizado() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!perfil) {
-      setErro("Usuário não autenticado")
-      return
-    }
+    // if (!perfil) {
+    //   setErro("Usuário não autenticado")
+    //   return
+    // }
 
     if (!data) {
       setErro("Selecione uma data para o almoço")
@@ -85,11 +70,11 @@ export function ComprarTicketSincronizado() {
       // Criar novo ticket
       const novoTicket = {
         id: generateTicketId(),
-        usuario_id: perfil.id,
+        usuario_id: "anon",
         data: data.toISOString(),
         quantidade,
         valor_total: precoTotal,
-        status: "pendente", // Começa como pendente para o admin confirmar
+        status: "pendente" as const, // Começa como pendente para o admin confirmar
         created_at: new Date().toISOString(),
         subsidiado: tipoTicket === "subsidiado",
       }

@@ -172,6 +172,14 @@ const traducoes: Record<Idioma, Record<string, string>> = {
     "rodape.linksUteis": "Links Úteis",
     "rodape.contato": "Contato",
     "rodape.direitos": "Todos os direitos reservados.",
+    "rodape.newsletter": "Newsletter",
+    "rodape.receberNoticias": "Receba novidades sobre o cardápio e eventos",
+    "rodape.seuEmail": "Seu e-mail",
+    "rodape.inscrever": "Inscrever",
+    "rodape.inscritoNewsletter": "Obrigado por se inscrever!",
+    "rodape.voltarTopo": "Voltar ao topo",
+    "rodape.termosUso": "Termos de Uso",
+    "rodape.politicaPrivacidade": "Política de Privacidade",
 
     // Idiomas
     "idioma.ptBR": "Português (Brasil)",
@@ -371,10 +379,18 @@ const traducoes: Record<Idioma, Record<string, string>> = {
     "acessibilidade.irConteudo": "Go to main content",
 
     // Footer
-    "rodape.descricao": "Offering nutritious and affordable meals for the entire academic community.",
+    "rodape.descricao": "University Restaurant offers nutritious and affordable meals for the entire academic community.",
     "rodape.linksUteis": "Useful Links",
     "rodape.contato": "Contact",
     "rodape.direitos": "All rights reserved.",
+    "rodape.newsletter": "Newsletter",
+    "rodape.receberNoticias": "Get updates about menu and events",
+    "rodape.seuEmail": "Your email",
+    "rodape.inscrever": "Subscribe",
+    "rodape.inscritoNewsletter": "Thanks for subscribing!",
+    "rodape.voltarTopo": "Back to top",
+    "rodape.termosUso": "Terms of Use",
+    "rodape.politicaPrivacidade": "Privacy Policy",
 
     // Languages
     "idioma.ptBR": "Portuguese (Brazil)",
@@ -540,6 +556,14 @@ const traducoes: Record<Idioma, Record<string, string>> = {
     "rodape.linksUteis": "Enlaces Útiles",
     "rodape.contato": "Contacto",
     "rodape.direitos": "Todos los derechos reservados.",
+    "rodape.newsletter": "Newsletter",
+    "rodape.receberNoticias": "Receba novidades sobre o cardápio e eventos",
+    "rodape.seuEmail": "Seu e-mail",
+    "rodape.inscrever": "Inscrever",
+    "rodape.inscritoNewsletter": "Obrigado por se inscrever!",
+    "rodape.voltarTopo": "Voltar ao topo",
+    "rodape.termosUso": "Termos de Uso",
+    "rodape.politicaPrivacidade": "Política de Privacidade",
 
     // Languages
     "idioma.ptBR": "Portugués (Brasil)",

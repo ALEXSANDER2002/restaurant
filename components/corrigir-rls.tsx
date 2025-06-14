@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle, Database, RefreshCw } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+// import { supabase } from "@/lib/supabase"
 
 export default function CorrigirRLS() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")

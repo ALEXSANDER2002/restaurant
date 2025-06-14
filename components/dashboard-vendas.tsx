@@ -26,8 +26,7 @@ import { AlertCircle, RefreshCw } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loading } from "@/components/ui/loading"
 import { StatusAlert } from "@/components/status-alert"
-import { useSupabase } from "@/contexts/supabase-provider"
-import { supabase } from "@/lib/supabase"
+// import { useSupabase } from "@/contexts/supabase-provider"
 import { Button } from "@/components/ui/button"
 
 // Dados simulados para os gráficos
@@ -100,31 +99,16 @@ interface ChartContainerProps {
 
 export function DashboardVendas() {
   const [carregando, setCarregando] = useState(true)
-  const [conectado, setConectado] = useState(false)
+  const [conectado, setConectado] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
-  const { isOnline } = useSupabase()
+  // const { isOnline } = useSupabase()
 
   const verificarConexao = async () => {
     try {
       setCarregando(true)
       setErro(null)
 
-      if (!supabase) {
-        setConectado(false)
-        setErro("Cliente do banco de dados não inicializado.")
-        return
-      }
-
-      // Tenta fazer uma consulta simples para verificar a conexão
-      const { data, error } = await supabase.from("tickets").select("count")
-      
-      if (error) {
-        console.error("Erro ao verificar conexão:", error)
-        setConectado(false)
-        setErro("Não foi possível conectar ao banco de dados.")
-        return
-      }
-
+      // Conexão supabase removida; assumir conectado em modo offline
       setConectado(true)
     } catch (error) {
       console.error("Erro ao verificar conexão:", error)
@@ -137,9 +121,8 @@ export function DashboardVendas() {
 
   useEffect(() => {
     verificarConexao()
-  }, [isOnline])
+  }, [])
 
-  const { supabase } = useSupabase()
   const [dadosDiarios, setDadosDiarios] = useState(DADOS_DIARIOS)
   const [dadosSemanais, setDadosSemanais] = useState(DADOS_SEMANAIS)
   const [distribuicaoStatus, setDistribuicaoStatus] = useState(DISTRIBUICAO_STATUS)
@@ -405,7 +388,7 @@ export function DashboardVendas() {
             <Card>
               <CardHeader>
                 <CardTitle>Distribuição por Status</CardTitle>
-              </CardHeader>
+                </CardHeader>
               <CardContent>
                 <ChartContainer height={300}>
                   <div style={{ width: "100%", height: "100%", position: "relative" }}>
@@ -437,7 +420,7 @@ export function DashboardVendas() {
             <Card>
               <CardHeader>
                 <CardTitle>Tipos de Tickets</CardTitle>
-              </CardHeader>
+                </CardHeader>
               <CardContent>
                 <ChartContainer height={300}>
                   <div style={{ width: "100%", height: "100%", position: "relative" }}>
@@ -474,7 +457,7 @@ export function DashboardVendas() {
             <Card>
               <CardHeader>
                 <CardTitle>Top 5 Usuários</CardTitle>
-              </CardHeader>
+                </CardHeader>
               <CardContent>
                 <ChartContainer height={300}>
                   <div style={{ width: "100%", height: "100%", position: "relative" }}>

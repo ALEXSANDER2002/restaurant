@@ -3,23 +3,36 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { BotaoEntrar } from "./botao-entrar"
-import { useAuth } from "@/contexts/auth-context"
 import { useIdioma } from "@/contexts/idioma-context"
 import { LogOut, User, Menu, X, Utensils } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
+import { motion } from "framer-motion"
+import { useScrollDirection } from "@/hooks/use-scroll-direction"
+import { useAuth } from "@/contexts/auth-context"
+import { BotaoSair } from "./botao-sair"
 
 export function Cabecalho() {
-  const { usuario, perfil, sair } = useAuth()
   const { t } = useIdioma()
+  const { usuario } = useAuth()
   const [menuAberto, setMenuAberto] = useState(false)
   const pathname = usePathname()
+  const scrollDir = useScrollDirection(8)
 
   const toggleMenu = () => setMenuAberto(!menuAberto)
 
   return (
-    <header className="bg-background border-b sticky top-0 z-50 shadow-sm" role="banner">
+    <motion.header
+      role="banner"
+      initial={{ y: 0, opacity: 1 }}
+      animate={{
+        y: scrollDir === "down" ? -80 : 0,
+        opacity: scrollDir === "down" ? 0.7 : 1,
+      }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="sticky top-0 z-50 backdrop-blur bg-[#0B2F67]/95 text-white border-b border-[#0B2F67] shadow-lg"
+    >
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -35,59 +48,53 @@ export function Cabecalho() {
           <nav className="hidden md:block" aria-label="Menu principal">
             <ul className="flex items-center gap-4">
               <li>
-                <Link href="/" passHref legacyBehavior>
                   <Button
+                  asChild
                     variant="ghost"
-                    as="a"
                     className={cn(
-                      "hover:bg-primary/10 transition-colors",
-                      pathname === "/" && "bg-primary/10 font-medium",
+                    "hover:bg-white/10 transition-colors",
+                    pathname === "/" && "bg-white/10 font-medium",
                     )}
                   >
-                    {t("nav.inicio")}
+                  <Link href="/">{t("nav.inicio")}</Link>
                   </Button>
-                </Link>
               </li>
               <li>
-                <Link href="#cardapio" passHref legacyBehavior>
-                  <Button variant="ghost" as="a" className="hover:bg-primary/10 transition-colors">
-                    {t("nav.cardapio")}
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="hover:bg-white/10 transition-colors"
+                >
+                  <Link href="#cardapio">{t("nav.cardapio")}</Link>
                   </Button>
-                </Link>
               </li>
               <li>
-                <Link href="#sobre" passHref legacyBehavior>
-                  <Button variant="ghost" as="a" className="hover:bg-primary/10 transition-colors">
-                    {t("nav.sobre")}
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="hover:bg-white/10 transition-colors"
+                >
+                  <Link href="#sobre">{t("nav.sobre")}</Link>
                   </Button>
-                </Link>
               </li>
               {usuario ? (
                 <>
                   <li>
-                    <Link href={perfil?.tipo === "admin" ? "/admin" : "/usuario"} passHref legacyBehavior>
+                    <Link href={usuario.tipo_usuario === "admin" ? "/admin" : "/usuario"}>
                       <Button
                         variant="ghost"
-                        as="a"
                         className={cn(
                           "hover:bg-primary/10 transition-colors",
-                          (pathname === "/admin" || pathname === "/usuario") && "bg-primary/10 font-medium",
+                          pathname === "/usuario" && "bg-primary/10 font-medium",
                         )}
                       >
                         <User className="mr-2 h-4 w-4" />
-                        {perfil?.nome?.split(" ")[0] || t("nav.minhaConta")}
+                        {usuario.tipo_usuario === "admin" ? "Admin" : usuario.email.split("@")[0]}
                       </Button>
                     </Link>
                   </li>
                   <li>
-                    <Button
-                      variant="outline"
-                      onClick={sair}
-                      className="hover:bg-destructive/10 hover:text-destructive transition-colors"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      {t("nav.sair")}
-                    </Button>
+                    <BotaoSair />
                   </li>
                 </>
               ) : (
@@ -113,63 +120,56 @@ export function Cabecalho() {
 
         {/* Menu mobile */}
         {menuAberto && (
-          <nav className="md:hidden pt-4 pb-2 border-t mt-3" aria-label="Menu mobile">
+          <nav className="md:hidden pt-4 pb-2 border-t mt-3 bg-background/90 backdrop-blur-md rounded-b-md shadow-md" aria-label="Menu mobile">
             <ul className="flex flex-col gap-2">
               <li>
-                <Link href="/" onClick={() => setMenuAberto(false)}>
                   <Button
+                  asChild
                     variant="ghost"
                     className={cn(
-                      "w-full justify-start hover:bg-primary/10",
-                      pathname === "/" && "bg-primary/10 font-medium",
+                    "w-full justify-start hover:bg-white/10",
+                    pathname === "/" && "bg-white/10 font-medium",
                     )}
                   >
-                    {t("nav.inicio")}
+                  <Link href="/" onClick={() => setMenuAberto(false)}>{t("nav.inicio")}</Link>
                   </Button>
-                </Link>
               </li>
               <li>
-                <Link href="#cardapio" onClick={() => setMenuAberto(false)}>
-                  <Button variant="ghost" className="w-full justify-start hover:bg-primary/10">
-                    {t("nav.cardapio")}
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="w-full justify-start hover:bg-white/10"
+                >
+                  <Link href="#cardapio" onClick={() => setMenuAberto(false)}>{t("nav.cardapio")}</Link>
                   </Button>
-                </Link>
               </li>
               <li>
-                <Link href="#sobre" onClick={() => setMenuAberto(false)}>
-                  <Button variant="ghost" className="w-full justify-start hover:bg-primary/10">
-                    {t("nav.sobre")}
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="w-full justify-start hover:bg-white/10"
+                >
+                  <Link href="#sobre" onClick={() => setMenuAberto(false)}>{t("nav.sobre")}</Link>
                   </Button>
-                </Link>
               </li>
               {usuario ? (
                 <>
                   <li>
-                    <Link href={perfil?.tipo === "admin" ? "/admin" : "/usuario"} onClick={() => setMenuAberto(false)}>
+                    <Link href={usuario.tipo_usuario === "admin" ? "/admin" : "/usuario"}>
                       <Button
                         variant="ghost"
                         className={cn(
                           "w-full justify-start hover:bg-primary/10",
-                          (pathname === "/admin" || pathname === "/usuario") && "bg-primary/10 font-medium",
+                          pathname === "/usuario" && "bg-primary/10 font-medium",
                         )}
                       >
                         <User className="mr-2 h-4 w-4" />
-                        {perfil?.nome?.split(" ")[0] || t("nav.minhaConta")}
+                        {usuario.tipo_usuario === "admin" ? "Admin" : usuario.email.split("@")[0]}
                       </Button>
                     </Link>
                   </li>
                   <li>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        sair()
-                        setMenuAberto(false)
-                      }}
-                      className="w-full justify-start hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      {t("nav.sair")}
-                    </Button>
+                    <BotaoSair />
                   </li>
                 </>
               ) : (
@@ -181,7 +181,7 @@ export function Cabecalho() {
           </nav>
         )}
       </div>
-    </header>
+    </motion.header>
   )
 }
 

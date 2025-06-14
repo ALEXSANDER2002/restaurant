@@ -9,9 +9,8 @@ import { format, parseISO } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Check, Search, X, AlertCircle, Info } from "lucide-react"
-import { buscarTodosTickets, atualizarStatusTicket, type Ticket } from "@/services/ticket-service"
+import { buscarTodosTickets, atualizarStatusTicket, type Ticket } from "@/services/ticket-sync-service"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { supabase } from "@/lib/supabase" // Corrigido: usando o cliente Supabase correto
 
 interface PedidoExibicao extends Ticket {
   usuario_nome?: string
@@ -39,7 +38,7 @@ export function ListaPedidos() {
         // Transformar os dados para o formato esperado
         const pedidosFormatados = tickets.map((ticket) => ({
           ...ticket,
-          usuario_nome: ticket.perfis?.nome || "Usuário desconhecido",
+          usuario_nome: ticket.usuario_id ?? "Usuário",
         }))
 
         setPedidos(pedidosFormatados)
@@ -60,28 +59,6 @@ export function ListaPedidos() {
     }
 
     carregarPedidos()
-
-    // Configurar assinatura para atualizações em tempo real
-    const subscription = supabase
-      .channel("tickets-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "tickets",
-        },
-        (payload) => {
-          // Recarregar pedidos quando houver mudanças
-          carregarPedidos()
-        },
-      )
-      .subscribe()
-
-    // Limpar assinatura ao desmontar
-    return () => {
-      subscription.unsubscribe()
-    }
   }, [])
 
   useEffect(() => {

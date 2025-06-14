@@ -1,14 +1,11 @@
-import { AdminDatabase } from "@/components/admin-database"
-import { ProtecaoRota } from "@/components/protecao-rota"
+export const metadata = { title: "Admin - Banco de Dados" }
 
-export default function PaginaAdminDatabase() {
+export default function AdminDatabasePage() {
   return (
-    <ProtecaoRota tipoPermitido="admin">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Administração do Banco de Dados</h1>
-        <AdminDatabase />
-      </div>
-    </ProtecaoRota>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold text-[#0B2F67] mb-4">Banco de Dados</h1>
+      <p>Ferramenta administrativa de banco de dados ainda não disponível.</p>
+    </div>
   )
 }
 

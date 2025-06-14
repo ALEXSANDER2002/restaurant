@@ -1,12 +1,14 @@
 {
-  "name": "my-v0-project",
+  "name": "restaurant",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:gen": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -38,19 +40,23 @@
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
-    "@supabase/supabase-js": "^2.39.7",
     "autoprefixer": "^10.4.20",
+    "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
     "date-fns": "latest",
+    "drizzle-orm": "^0.30.6",
     "embla-carousel-react": "8.5.1",
     "framer-motion": "latest",
     "html5-qrcode": "latest",
     "input-otp": "1.4.1",
+    "keen-slider": "^6.8.6",
     "lucide-react": "^0.454.0",
     "next": "15.2.4",
     "next-themes": "latest",
+    "nprogress": "^0.2.0",
+    "pg": "^8.11.5",
     "react": "^19",
     "react-day-picker": "8.10.1",
     "react-dom": "^19",
@@ -62,12 +68,15 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
-    "zod": "latest"
+    "zod": "latest",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/jsonwebtoken": "^9.0.2",
+    "drizzle-kit": "^0.20.8",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"

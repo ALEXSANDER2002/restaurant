@@ -129,3 +129,50 @@
   margin-right: 8px;
 }
 
+/* Transições suaves para links e botões */
+a, button, [role="button"] {
+  transition: color 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Foco visível para acessibilidade */
+:focus {
+  outline: 2px solid #1351B4;
+  outline-offset: 2px;
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 10px;
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Seleção de texto com cor de destaque */
+::selection {
+  background: #1351B4;
+  color: #fff;
+}
+
+html, body {
+  min-height: 100vh;
+}
+
+img, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Sombra global para cards e modais */
+.card, .modal, .shadow-global {
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08), 0 1.5px 4px 0 rgba(0,0,0,0.04);
+}
+
+/* Espaçamento entre seções principais */
+

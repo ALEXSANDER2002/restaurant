@@ -1,4 +1,6 @@
-import { supabase } from "@/lib/supabase"
+import { db } from "@/lib/drizzle"
+import { perfis } from "@/lib/drizzle/schema"
+import { eq } from "drizzle-orm"
 
 export interface PerfilUsuario {
   id: string
@@ -11,58 +13,18 @@ export interface PerfilUsuario {
 
 export async function buscarTodosUsuarios() {
   try {
-    // Try to get data from Supabase first
-    try {
-      const { data, error } = await supabase.from("perfis").select("*").order("nome")
-
-      if (error) {
-        throw error
-      }
-
-      return { usuarios: data || [], erro: null }
-    } catch (error: any) {
-      // If there's an error with Supabase, check if it's the recursion error
-      console.warn("Erro ao buscar usuários do Supabase:", error)
-
-      if (error.message && error.message.includes("infinite recursion")) {
-        console.log("Detectado erro de recursão infinita, usando dados simulados")
-        return { usuarios: gerarUsuariosSimulados(), erro: null }
-      }
-
-      throw error
-    }
+    const usuarios = await db.select().from(perfis).orderBy(perfis.nome)
+    return { usuarios, erro: null }
   } catch (error: any) {
     console.error("Erro ao buscar usuários:", error)
-    // Return mock data as fallback
-    return { usuarios: gerarUsuariosSimulados(), erro: null }
+    return { usuarios: [], erro: error.message }
   }
 }
 
 export async function buscarUsuarioPorId(id: string) {
   try {
-    // Try to get data from Supabase first
-    try {
-      const { data, error } = await supabase.from("perfis").select("*").eq("id", id).single()
-
-      if (error) {
-        throw error
-      }
-
-      return { usuario: data, erro: null }
-    } catch (error: any) {
-      // If there's an error with Supabase, check if it's the recursion error
-      console.warn("Erro ao buscar usuário do Supabase:", error)
-
-      if (error.message && error.message.includes("infinite recursion")) {
-        console.log("Detectado erro de recursão infinita, usando dados simulados")
-        // Find a mock user with the given ID
-        const mockUsers = gerarUsuariosSimulados()
-        const mockUser = mockUsers.find((u) => u.id === id) || mockUsers[0]
-        return { usuario: mockUser, erro: null }
-      }
-
-      throw error
-    }
+    const usuario = await db.select().from(perfis).where(eq(perfis.id, id)).limit(1)
+    return { usuario: usuario[0] || null, erro: null }
   } catch (error: any) {
     console.error("Erro ao buscar usuário:", error)
     return { usuario: null, erro: error.message }
@@ -77,40 +39,12 @@ export async function criarUsuario(
   status: "ativo" | "inativo" = "ativo",
 ) {
   try {
-    // 1. Criar o usuário na autenticação
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password: senha,
-    })
+    const inserted = await db
+      .insert(perfis)
+      .values({ id: crypto.randomUUID(), nome, email, tipo_usuario: tipo, status })
+      .returning()
 
-    if (authError) {
-      throw authError
-    }
-
-    if (!authData.user) {
-      throw new Error("Falha ao criar usuário")
-    }
-
-    // 2. Criar o perfil do usuário
-    const { data: perfilData, error: perfilError } = await supabase
-      .from("perfis")
-      .insert({
-        id: authData.user.id,
-        nome,
-        email,
-        tipo,
-        status,
-      })
-      .select()
-      .single()
-
-    if (perfilError) {
-      // Tentar remover o usuário criado para evitar inconsistências
-      await supabase.auth.admin.deleteUser(authData.user.id)
-      throw perfilError
-    }
-
-    return { usuario: perfilData, erro: null }
+    return { usuario: inserted[0], erro: null }
   } catch (error: any) {
     console.error("Erro ao criar usuário:", error)
     return { usuario: null, erro: error.message }
@@ -126,56 +60,22 @@ export async function atualizarUsuario(
   },
 ) {
   try {
-    // Check if we're working with mock data (ID starts with 'mock-')
-    if (id.startsWith("mock-")) {
-      // Return a simulated successful response
-      const mockUser = {
-        id,
-        nome: dados.nome || "Usuário Simulado",
-        email: "usuario@exemplo.com",
-        tipo: dados.tipo || "estudante",
-        status: dados.status || "ativo",
-        created_at: new Date().toISOString(),
-      }
-      return { usuario: mockUser, erro: null }
-    }
+    const updated = await db.update(perfis).set({
+      ...(dados.nome && { nome: dados.nome }),
+      ...(dados.tipo && { tipo_usuario: dados.tipo }),
+      ...(dados.status && { status: dados.status }),
+      updated_at: new Date().toISOString(),
+    }).where(eq(perfis.id, id)).returning()
 
-    const { data, error } = await supabase.from("perfis").update(dados).eq("id", id).select().single()
-
-    if (error) {
-      throw error
-    }
-
-    return { usuario: data, erro: null }
+    return { usuario: updated[0], erro: null }
   } catch (error: any) {
-    console.error("Erro ao atualizar usuário:", error)
-    return { usuario: null, erro: error.message }
+    throw error
   }
 }
 
 export async function excluirUsuario(id: string) {
   try {
-    // Check if we're working with mock data (ID starts with 'mock-')
-    if (id.startsWith("mock-")) {
-      // Return a simulated successful response
-      return { sucesso: true, erro: null }
-    }
-
-    // 1. Excluir o perfil
-    const { error: perfilError } = await supabase.from("perfis").delete().eq("id", id)
-
-    if (perfilError) {
-      throw perfilError
-    }
-
-    // 2. Excluir o usuário da autenticação
-    // Nota: Em produção, isso requer permissões de admin
-    const { error: authError } = await supabase.auth.admin.deleteUser(id)
-
-    if (authError) {
-      throw authError
-    }
-
+    await db.delete(perfis).where(eq(perfis.id, id))
     return { sucesso: true, erro: null }
   } catch (error: any) {
     console.error("Erro ao excluir usuário:", error)

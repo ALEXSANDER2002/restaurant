@@ -1,4 +1,4 @@
-import RLSFixExecutor from "@/components/rls-fix-executor"
+// import { RLSFixExecutor } from "@/components/rls-fix-executor"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Info, AlertTriangle } from "lucide-react"
 import Link from "next/link"
@@ -26,7 +26,7 @@ export default function FixRLSPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
-          <RLSFixExecutor />
+          {/* <RLSFixExecutor /> */}
         </div>
 
         <div className="space-y-6">

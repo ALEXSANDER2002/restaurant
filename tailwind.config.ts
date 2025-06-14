@@ -52,6 +52,13 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Adicionando cores para o modo de alto contraste
+        'contrast-high': {
+          bg: '#000000',      // Fundo preto
+          text: '#FFFFFF',    // Texto branco
+          border: '#FFFFFF',  // Bordas brancas
+          accent: '#FFFF00',  // Elementos acentuados amarelos
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -67,15 +74,67 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
         },
+        // Adicionando animação para o modo de alto contraste
+        "high-contrast-pulse": {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: 0.8 },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        // Animação para elementos em alto contraste
+        "contrast-pulse": "high-contrast-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      },
+      // Extensões para o modo de alto contraste
+      backgroundColor: {
+        'contrast-high': 'var(--contrast-high-bg)',
+      },
+      textColor: {
+        'contrast-high': 'var(--contrast-high-text)',
+      },
+      borderColor: {
+        'contrast-high': 'var(--contrast-high-border)',
+      },
+      accentColor: {
+        'contrast-high': 'var(--contrast-high-accent)',
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // Plugin para estilos de alto contraste
+    function ({ addVariant, addUtilities }) {
+      addVariant('contrast-high', '.contrast-high &');
+      
+      addUtilities({
+        '.contrast-high': {
+          '--contrast-high-bg': '#000000',
+          '--contrast-high-text': '#FFFFFF',
+          '--contrast-high-border': '#FFFFFF',
+          '--contrast-high-accent': '#FFFF00',
+          'background-color': 'var(--contrast-high-bg) !important',
+          'color': 'var(--contrast-high-text) !important',
+          'border-color': 'var(--contrast-high-border) !important',
+        },
+        '.contrast-high *': {
+          'background-color': 'var(--contrast-high-bg) !important',
+          'color': 'var(--contrast-high-text) !important',
+          'border-color': 'var(--contrast-high-border) !important',
+        },
+        '.contrast-high a': {
+          'color': 'var(--contrast-high-accent) !important',
+          'text-decoration': 'underline !important',
+        },
+        '.contrast-high button': {
+          'border': '2px solid var(--contrast-high-border) !important',
+        },
+        '.contrast-high .text-accent': {
+          'color': 'var(--contrast-high-accent) !important',
+        },
+      });
+    },
+  ],
 } satisfies Config
 
 export default config
-

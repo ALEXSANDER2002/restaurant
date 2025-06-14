@@ -18,8 +18,8 @@ const ContextoIdioma = createContext<ContextoIdioma | undefined>(undefined)
 const traducoes: Record<Idioma, Record<string, string>> = {
   "pt-BR": {
     // Geral
-    "app.nome": "Restaurante Universitário",
-    "app.descricao": "Sistema de venda de almoço do Restaurante Universitário",
+    "app.nome": "SIRUS",
+    "app.descricao": "Sistema Integrado de Restaurante Universitário Simplificado",
 
     // Navegação
     "nav.inicio": "Início",

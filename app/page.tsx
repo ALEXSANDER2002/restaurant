@@ -133,19 +133,24 @@ export default function Home() {
             animate="visible"
             className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
           >
-            <MotionCard variants={cardVariants} whileHover="hover">
-              <CardHeader>
-                <CreditCard className="h-10 w-10 text-[#1351B4] mb-2" />
-                <CardTitle>Pagamento Digital</CardTitle>
-                <CardDescription>
-                  Compre seus tickets de forma rápida e segura através do nosso sistema.
-                </CardDescription>
-              </CardHeader>
-            </MotionCard>
+            <MotionCard 
+                variants={cardVariants} 
+                whileHover="hover"
+                className="bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white border border-gray-200" // Adicionado fundo branco e borda sutil
+              >
+                <CardHeader>
+                  <CreditCard className="h-10 w-10 text-[white] mb-2" /> {/* Mantido azul principal */}
+                  <CardTitle>Pagamento Digital</CardTitle> {/* Texto azul */}
+                  <CardDescription>
+                    Compre seus tickets de forma rápida e segura através do nosso sistema.
+                  </CardDescription>
+                </CardHeader>
+              </MotionCard>
 
-            <MotionCard variants={cardVariants} whileHover="hover">
+            <MotionCard variants={cardVariants}
+            className="bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white" whileHover="hover">
               <CardHeader>
-                <Clock className="h-10 w-10 text-[#1351B4] mb-2" />
+                <Clock className="h-10 w-10 text-white mb-2" />
                 <CardTitle>Horários Flexíveis</CardTitle>
                 <CardDescription>
                   Atendimento em diversos horários para sua conveniência.
@@ -153,9 +158,10 @@ export default function Home() {
               </CardHeader>
             </MotionCard>
 
-            <MotionCard variants={cardVariants} whileHover="hover">
+            <MotionCard variants={cardVariants} 
+            className="bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white" whileHover="hover">
               <CardHeader>
-                <Utensils className="h-10 w-10 text-[#1351B4] mb-2" />
+                <Utensils className="h-10 w-10 mb-2" />
                 <CardTitle>Cardápio Variado</CardTitle>
                 <CardDescription>
                   Refeições balanceadas e nutritivas com opções vegetarianas.
@@ -163,9 +169,10 @@ export default function Home() {
               </CardHeader>
             </MotionCard>
 
-            <MotionCard variants={cardVariants} whileHover="hover">
+            <MotionCard variants={cardVariants}
+            className="bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white" whileHover="hover">
               <CardHeader>
-                <Users className="h-10 w-10 text-[#1351B4] mb-2" />
+                <Users className="h-10 w-10 mb-2" />
                 <CardTitle>Preço Acessível</CardTitle>
                 <CardDescription>
                   Valores subsidiados para estudantes e servidores.

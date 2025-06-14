@@ -123,7 +123,7 @@ export function Rodape() {
           <div className="md:col-span-1">
             <h2 className="text-lg font-bold mb-4">{t("rodape.contato")}</h2>
             <address className="not-italic text-white/80">
-              <p className="mb-2">Universidade Federal</p>
+              <p className="mb-2">UNIFESSPA</p>
               <p className="mb-2">Av. Principal, 1000</p>
               <p className="mb-2 flex items-center">
                 <Mail className="h-4 w-4 mr-2" />
@@ -158,7 +158,7 @@ export function Rodape() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="bg-white/10 border-white/20 text-[#0B2F67] placeholder:text-[#0B2F67]/50 focus-visible:ring-white"
+                      className="bg-white/10 border-white/20 text-[#0B2F67] placeholder:text-[#0B2F67]/90 focus-visible:ring-white"
                       aria-label={t("rodape.seuEmail") || "Seu e-mail"}
                     />
                     <Button
@@ -179,7 +179,7 @@ export function Rodape() {
         {/* Rodapé inferior com copyright */}
         <div className="mt-8 text-center text-white/70 text-sm">
           <p>
-            &copy; {anoAtual} {t("app.nome")}. {t("rodape.direitos")}
+            &copy; {anoAtual} {t("app.descricao")}. {t("rodape.direitos")}
           </p>
           <div className="mt-2 flex justify-center space-x-4">
             <Link href="/termos" className="hover:text-white hover:underline transition-colors">

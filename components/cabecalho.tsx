@@ -37,8 +37,8 @@ export function Cabecalho() {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2 text-xl font-bold hover:opacity-80 transition-opacity">
-              <div className="bg-primary text-primary-foreground p-1.5 rounded-md">
-                <Utensils className="h-5 w-5" />
+              <div className="bg-white text-primary-foreground p-1.5 rounded-md">
+              <img src="/Sirus-logo.svg" alt="" className="h-12 w-12" />
               </div>
               {t("app.nome")}
             </Link>

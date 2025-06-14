@@ -328,8 +328,8 @@ export function ChatBot() {
             <Card
               className={cn(
                 "w-[90vw] sm:w-[450px] max-w-[450px] shadow-xl transition-all duration-300",
-                isMinimized ? "h-16" : "h-[80vh] sm:h-[600px]",
-                "bg-white flex flex-col"
+                isMinimized ? "h-16" : "h-[70vh] max-h-[600px] sm:h-[500px]",
+                "bg-white flex flex-col fixed sm:relative bottom-4 right-4 sm:bottom-auto sm:right-auto"
               )}
             >
               <CardHeader
@@ -339,8 +339,12 @@ export function ChatBot() {
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8 bg-white">
-                    <Utensils className="h-5 w-5 text-blue-600" />
+                  <Avatar className="h-8 w-8 bg-white flex items-center justify-center">
+                    <img 
+                      src="/Sirus-logo.svg" 
+                      className="h-6 w-6" 
+                      alt="SIRUS Logo" 
+                    />
                   </Avatar>
                   <CardTitle className="text-lg">Assistente do RU</CardTitle>
                 </div>
@@ -367,20 +371,20 @@ export function ChatBot() {
               {!isMinimized && (
                 <>
                   <CardContent className="flex-1 overflow-hidden flex flex-col p-0">
-                    <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-3 space-y-3">
                       {messages.map((message, index) => (
                         <div
                           key={index}
                           className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                         >
                           <div
-                            className={`max-w-[80%] rounded-lg p-3 ${
+                            className={`max-w-[85%] rounded-lg p-3 text-sm ${
                               message.role === "user"
                                 ? "bg-blue-600 text-white"
                                 : "bg-gray-100 text-gray-800"
                             }`}
                           >
-                            <p className="text-sm break-words">{message.content}</p>
+                            <p className="break-words">{message.content}</p>
                           </div>
                         </div>
                       ))}
@@ -397,9 +401,10 @@ export function ChatBot() {
                       )}
                       <div ref={messagesEndRef} />
                     </div>
-                    <div className="border-t p-4">
+                    <div className="border-t p-3">
                       <form onSubmit={handleSubmit} className="flex gap-2">
                         <input
+                          ref={inputRef}
                           type="text"
                           value={input}
                           onChange={(e) => setInput(e.target.value)}
@@ -411,7 +416,7 @@ export function ChatBot() {
                           disabled={isLoading}
                           className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                         >
-                          Enviar
+                          <Send className="h-4 w-4" />
                         </button>
                       </form>
                     </div>
@@ -423,12 +428,12 @@ export function ChatBot() {
           <Button
             onClick={toggleChat}
             className={cn(
-              "rounded-full h-16 w-16 shadow-lg bg-gradient-to-r from-blue-600 to-blue-800",
+              "rounded-full h-14 w-14 sm:h-16 sm:w-16 shadow-lg bg-gradient-to-r from-blue-600 to-blue-800",
               "hover:shadow-xl transition-all duration-300 hover:scale-105",
               "flex items-center justify-center text-white"
             )}
           >
-            <MessageCircle className="h-8 w-8" />
+            <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8" />
           </Button>
         </>
       )}

@@ -64,33 +64,6 @@ export default function PaginaLogin() {
               
               <TabsContent value="qrcode">
                 <LeitorQRCode />
-                
-                {mostrarDemo && (
-                  <div className="mt-4 p-4 bg-blue-800/20 dark:bg-blue-900/30 rounded-md border border-blue-300/20 dark:border-blue-400/20">
-                    <h3 className="text-sm font-medium text-blue-100 dark:text-blue-200 mb-2">
-                      QR Code de Demonstração:
-                    </h3>
-                    <div className="flex justify-center">
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-                          JSON.stringify({ email: "estudante@exemplo.com", senha: "senha123" }),
-                        )}`}
-                        alt="QR Code de demonstração"
-                        className="border border-blue-300/30 dark:border-blue-400/30 rounded-md"
-                      />
-                    </div>
-                  </div>
-                )}
-                
-                <div className="mt-4 flex justify-center">
-                  <Button 
-                    variant="outline"
-                    className="bg-transparent text-blue-100 dark:text-blue-200 border-blue-300/40 dark:border-blue-400/40 hover:bg-blue-700/30 dark:hover:bg-blue-800/40 hover:text-white"
-                    onClick={() => setMostrarDemo(!mostrarDemo)}
-                  >
-                    {mostrarDemo ? "Ocultar QR Code de Teste" : "Mostrar QR Code de Teste"}
-                  </Button>
-                </div>
               </TabsContent>
             </Tabs>
           </CardContent>

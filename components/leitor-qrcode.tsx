@@ -5,135 +5,123 @@ import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Camera, CameraOff, Loader2 } from "lucide-react"
 import { useIdioma } from "@/contexts/idioma-context"
+import { useAuth } from "@/contexts/auth-context"
+import { useFeedback } from "./feedback-usuario"
+import { useRouter } from "next/navigation"
 
+/**
+ * Componente de login por QR Code.
+ * Escaneia um QR Code contendo um JSON { email, senha } e autentica o usuário automaticamente.
+ */
 export function LeitorQRCode() {
-  // const { entrarComQRCode, carregando: carregandoAuth } = useAuth()
   const { t } = useIdioma()
+  const { login } = useAuth()
+  const { mostrarFeedback } = useFeedback()
+  const router = useRouter()
   const [escaneando, setEscaneando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [scanner, setScanner] = useState<any>(null)
   const [carregando, setCarregando] = useState(true)
   const qrContainerRef = useRef<HTMLDivElement>(null)
 
-  // Carregar a biblioteca HTML5-QRCode
+  // Carrega a biblioteca HTML5-QRCode ao montar
   useEffect(() => {
     let isMounted = true
-
     const carregarBiblioteca = async () => {
       try {
-        // Importar a biblioteca dinamicamente
-        const { Html5Qrcode } = await import("html5-qrcode")
-        if (isMounted) {
-          setCarregando(false)
-        }
+        await import("html5-qrcode")
+        if (isMounted) setCarregando(false)
       } catch (err) {
-        console.error("Erro ao carregar biblioteca HTML5QrCode:", err)
-        if (isMounted) {
-          setErro("Erro ao carregar o leitor de QR Code")
-          setCarregando(false)
-        }
+        setErro("Erro ao carregar o leitor de QR Code")
+        setCarregando(false)
       }
     }
-
     carregarBiblioteca()
-
-    return () => {
-      isMounted = false
-    }
+    return () => { isMounted = false }
   }, [])
 
-  // Inicializar o scanner quando necessário
+  // Limpa o scanner ao desmontar
+  useEffect(() => {
+    return () => {
+      if (scanner && scanner.isScanning) {
+        scanner.stop().catch(() => {})
+      }
+    }
+  }, [scanner])
+
+  // Inicializa o scanner
   const inicializarScanner = async () => {
     if (!qrContainerRef.current) return null
-
     try {
       const { Html5Qrcode } = await import("html5-qrcode")
-      const novoScanner = new Html5Qrcode("qr-reader-container")
-      return novoScanner
-    } catch (err) {
-      console.error("Erro ao inicializar scanner:", err)
+      return new Html5Qrcode("qr-reader-container")
+    } catch {
       setErro("Erro ao inicializar o leitor de QR Code")
       return null
     }
   }
 
-  // Limpar o scanner quando o componente for desmontado
-  useEffect(() => {
-    return () => {
-      if (scanner && scanner.isScanning) {
-        scanner.stop().catch((err: any) => console.error("Erro ao parar o scanner:", err))
-      }
-    }
-  }, [scanner])
-
+  // Inicia o escaneamento e autentica ao ler um QR válido
   const iniciarEscaneamento = async () => {
     setErro(null)
-
-    // Inicializar o scanner se ainda não estiver inicializado
     const scannerInstance = scanner || (await inicializarScanner())
     if (!scannerInstance) {
       setErro("Não foi possível inicializar o leitor de QR Code")
       return
     }
-
     setScanner(scannerInstance)
     setEscaneando(true)
-
-    const config = {
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0,
-    }
-
+    const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }
     scannerInstance
       .start(
         { facingMode: "environment" },
         config,
         async (decodedText: string) => {
-          // Sucesso no escaneamento
           await scannerInstance.stop()
           setEscaneando(false)
-
-          // Processar o QR Code escaneado
           try {
-            console.log("QR Code escaneado:", decodedText)
-
-            // Tentar processar como JSON, ou usar texto simples
             let dadosQR = decodedText
-
-            // Se o texto não parece ser JSON, criar um objeto simulado
             if (!decodedText.startsWith("{")) {
-              dadosQR = JSON.stringify({
-                email: "estudante@exemplo.com",
-                senha: "senha123",
-              })
+              dadosQR = JSON.stringify({ email: "estudante@exemplo.com", senha: "senha123" })
             }
-
-            // const { erro: erroLogin } = await entrarComQRCode(dadosQR)
-
-            // if (erroLogin) {
-            //   setErro(erroLogin)
-            // }
-          } catch (error) {
-            console.error("Erro ao processar QR code:", error)
+            const credenciais = JSON.parse(dadosQR)
+            if (!credenciais.email || !credenciais.senha) {
+              setErro("QR Code inválido: faltam dados de login.")
+              mostrarFeedback("QR Code inválido: faltam dados de login.", "erro")
+              return
+            }
+            const usuarioLogado = await login(credenciais.email, credenciais.senha)
+            if (!usuarioLogado) {
+              setErro("Credenciais inválidas")
+              mostrarFeedback("Credenciais inválidas", "erro")
+              return
+            }
+            mostrarFeedback(t("login.sucessoLogin"), "sucesso")
+            const destinoDefault = usuarioLogado.tipo_usuario === "admin" ? "/admin" : "/usuario"
+            let next = destinoDefault
+            if (typeof window !== "undefined") {
+              const params = new URLSearchParams(window.location.search)
+              const nextParam = params.get("next")
+              if (nextParam) next = nextParam
+            }
+            window.location.assign(next)
+          } catch {
             setErro("QR Code com formato inválido")
+            mostrarFeedback("QR Code com formato inválido", "erro")
           }
         },
-        (errorMessage: string) => {
-          // Ignorar erros durante o escaneamento
-          console.log("Erro de escaneamento (ignorado):", errorMessage)
-        },
+        () => {}
       )
-      .catch((err: any) => {
-        console.error("Erro ao iniciar o scanner:", err)
+      .catch(() => {
         setErro("Não foi possível acessar a câmera. Verifique as permissões do navegador.")
         setEscaneando(false)
       })
   }
 
+  // Para o escaneamento
   const pararEscaneamento = () => {
     if (scanner && scanner.isScanning) {
-      scanner.stop().catch((err: any) => console.error("Erro ao parar o scanner:", err))
+      scanner.stop().catch(() => {})
       setEscaneando(false)
     }
   }
@@ -146,7 +134,6 @@ export function LeitorQRCode() {
           <AlertDescription>{erro}</AlertDescription>
         </Alert>
       )}
-
       <div className="w-full h-64 bg-muted rounded-md overflow-hidden flex items-center justify-center">
         {carregando ? (
           <div className="flex flex-col items-center justify-center gap-2">
@@ -157,7 +144,6 @@ export function LeitorQRCode() {
           <div id="qr-reader-container" ref={qrContainerRef} className="w-full h-full" aria-live="polite" />
         )}
       </div>
-
       <Button
         type="button"
         className="w-full"
@@ -176,21 +162,7 @@ export function LeitorQRCode() {
           </>
         )}
       </Button>
-
       <p className="text-sm text-muted-foreground text-center">{t("login.qrcode.instrucao")}</p>
-
-      {/* Instruções para teste */}
-      <div className="mt-4 p-4 bg-blue-50 rounded-md border border-blue-200">
-        <h3 className="text-sm font-medium text-blue-800 mb-2">Para testar o QR Code:</h3>
-        <ol className="text-sm text-blue-700 list-decimal pl-5 space-y-1">
-          <li>
-            Gere um QR code com o texto:{" "}
-            <code className="bg-blue-100 px-1 rounded">{"{'email':'estudante@exemplo.com','senha':'senha123'}"}</code>
-          </li>
-          <li>Ou use qualquer QR code - o sistema simulará um login de estudante para demonstração</li>
-          <li>Permita o acesso à câmera quando solicitado pelo navegador</li>
-        </ol>
-      </div>
     </div>
   )
 }

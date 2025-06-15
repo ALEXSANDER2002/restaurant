@@ -6,7 +6,7 @@ import { FormularioLogin } from "@/components/formulario-login"
 import { LeitorQRCode } from "@/components/leitor-qrcode"
 import { useIdioma } from "@/contexts/idioma-context"
 import { useAuth } from "@/contexts/auth-context"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 
@@ -14,15 +14,21 @@ export default function PaginaLogin() {
   const { t } = useIdioma()
   const { usuario } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [mostrarDemo, setMostrarDemo] = useState(false)
 
   useEffect(() => {
     if (usuario) {
-      const next = searchParams?.get("next") || "/usuario"
-      router.replace(next)
+      let prox = "/usuario"
+
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search)
+        const nextParam = params.get("next")
+        if (nextParam) prox = nextParam
+      }
+
+      router.replace(prox)
     }
-  }, [usuario, router, searchParams])
+  }, [usuario, router])
 
   return (
     <section className="flex flex-col flex-1 items-center justify-center min-h-[calc(100vh-200px)] bg-white dark:bg-gradient-to-br dark:from-[#0a1a33] dark:to-[#051224]">

@@ -41,8 +41,27 @@ export function BarraAcessibilidade() {
     }
   }, [tema])
 
+  // Detecta se o VLibras já foi inserido por outro componente (ex.: carregamento automático)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // @ts-ignore
+      if (window.VLibras) {
+        setVLibrasCarregado(true)
+      }
+    }
+  }, [])
+
   const carregarVLibras = () => {
     if (vLibrasCarregado || typeof window === "undefined") return
+
+    // Se o script já estiver presente, apenas marca como carregado
+    const scriptJaExiste = document.querySelector(
+      'script[src="https://vlibras.gov.br/app/vlibras-plugin.js"]'
+    )
+    if (scriptJaExiste) {
+      setVLibrasCarregado(true)
+      return
+    }
 
     const jaExiste = document.querySelector('[vw]')
     if (!jaExiste) {

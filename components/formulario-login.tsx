@@ -13,7 +13,7 @@ import { useIdioma } from "@/contexts/idioma-context"
 import { useAuth } from "@/contexts/auth-context"
 import { AjudaContextual } from "./ajuda-contextual"
 import { useFeedback } from "./feedback-usuario"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 export function FormularioLogin() {
   // const { entrar, carregando: carregandoAuth } = useAuth()
@@ -27,7 +27,6 @@ export function FormularioLogin() {
   const [carregando, setCarregando] = useState(false)
   const [mostrarSenha, setMostrarSenha] = useState(false)
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,7 +42,12 @@ export function FormularioLogin() {
       }
       mostrarFeedback(t("login.sucessoLogin"), "sucesso")
       const destinoDefault = usuarioLogado.tipo_usuario === "admin" ? "/admin" : "/usuario"
-      const next = searchParams?.get("next") || destinoDefault
+      let next = destinoDefault
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search)
+        const nextParam = params.get("next")
+        if (nextParam) next = nextParam
+      }
       window.location.assign(next)
     } catch (error: any) {
       const mensagemErro = "Ocorreu um erro ao fazer login. Tente novamente."

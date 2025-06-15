@@ -34,7 +34,7 @@ export function Rodape() {
       {/* Botão voltar ao topo */}
       <button
         onClick={scrollToTop}
-        className="absolute -top-5 right-8 bg-[#0B2F67] text-white rounded-full p-2 shadow-lg hover:bg-[#0B2F67]/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
+        className="absolute -top-5 right-8 bg-[#0B2F67] text-white border-b border-white/50 rounded-full p-2 shadow-lg hover:bg-[#0B2F67]/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
         aria-label={t("rodape.voltarTopo") || "Voltar ao topo"}
       >
         <ArrowUp className="h-5 w-5" />

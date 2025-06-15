@@ -9,12 +9,15 @@ import { useRef } from "react"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 import { DepoimentosCarrossel } from "@/components/depoimentos-carrossel"
 import { HeroImage } from "@/components/hero-image"
+import { useTema } from "@/components/provedor-tema"
+import { cn } from "@/lib/utils"
 
 // Create motion versions of our components
 const MotionCard = motion(Card)
 
 export default function Home() {
   const prefersReducedMotion = useReducedMotion()
+  const { contraste } = useTema()
 
   // References for scroll animations
   const heroRef = useRef(null)
@@ -82,47 +85,59 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white overflow-hidden mb-0">
+    <div className="min-h-screen flex flex-col bg-white d">
+      {/* Hero Section - Mantém gradiente fixo */}
+      <section className="relative bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white overflow-hidden mb-0 ">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 grid md:grid-cols-2 gap-12 items-center min-h-[70vh]">
-            <div>
+          <div>
             <h1 className="font-extrabold mb-6 leading-tight drop-shadow-lg text-[clamp(2.5rem,5vw,3.5rem)]">
               Refeições de qualidade,
               <br className="hidden sm:block" />
               preço que cabe no bolso.
-              </h1>
+            </h1>
             <p className="text-lg mb-8 text-white/90 max-w-lg">
               Nutrição, sabor e praticidade em um só lugar. Garanta agora o seu almoço no Restaurante Universitário.
-              </p>
-              <div className="flex gap-4">
+            </p>
+            <div className="flex gap-4">
               <Link href="/login">
                 <Button size="lg" className="bg-yellow-400 text-[#0B2F67] font-bold hover:bg-yellow-300 shadow-lg">
-                    Entrar
-                  </Button>
-                </Link>
-                <Link href="/cardapio">
+                  Entrar
+                </Button>
+              </Link>
+              <Link href="/cardapio">
                 <Button size="lg" className="bg-white text-[#0B2F67] font-bold hover:bg-white/90 shadow-lg border-transparent">
-                    Ver Cardápio
-                  </Button>
-                </Link>
-              </div>
+                  Ver Cardápio
+                </Button>
+              </Link>
             </div>
+          </div>
           <HeroImage />
           <ChevronDown className="absolute left-1/2 -translate-x-1/2 bottom-8 animate-bounce text-white/70" />
           {/* Wave */}
-          <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M0,0 C360,100 720,100 1080,0 L1440,0 L1440,100 L0,100 Z"/></svg>
+           <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
+    <svg
+      className="relative block w-full h-[120px]"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1440 320"
+      preserveAspectRatio="none"
+    >
+      <path
+        fill={contraste === "alto" ? "#000000" : "#ffffff"}
+        d="M0,192L48,170.7C96,149,192,107,288,117.3C384,128,480,192,576,229.3C672,267,768,277,864,240C960,203,1056,117,1152,85.3C1248,53,1344,75,1392,85.3L1440,96V320H0Z"
+      />
+    </svg>
+  </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-white relative">
+      {/* Features Section - Fundo escuro e cards brancos */}
+      <section className="py-24 bg-white dark:bg-gradient-to-br dark:from-[#0a1a33] dark:to-[#051224] relative">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-semibold text-[#0B2F67] mb-4">
+            <h2 className="text-3xl font-semibold text-[#0B2F67] dark:text-white mb-4">
               Nossos Serviços
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-white/70 max-w-2xl mx-auto">
               Conheça as facilidades que oferecemos para tornar sua experiência
               mais agradável no restaurante universitário.
             </p>
@@ -134,82 +149,154 @@ export default function Home() {
             className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
           >
             <MotionCard 
-                variants={cardVariants} 
-                whileHover="hover"
-                className="bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white border border-gray-200" // Adicionado fundo branco e borda sutil
-              >
-                <CardHeader>
-                  <CreditCard className="h-10 w-10 text-[white] mb-2" /> {/* Mantido azul principal */}
-                  <CardTitle>Pagamento Digital</CardTitle> {/* Texto azul */}
-                  <CardDescription>
-                    Compre seus tickets de forma rápida e segura através do nosso sistema.
-                  </CardDescription>
-                </CardHeader>
-              </MotionCard>
-
-            <MotionCard variants={cardVariants}
-            className="bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white" whileHover="hover">
+              variants={cardVariants} 
+              whileHover={contraste === "alto" ? undefined : "hover"}
+              className={cn(
+                "bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white",
+                "dark:bg-white dark:text-white", // Modo escuro: fundo branco, texto preto
+                contraste === "alto" && "bg-black text-white"
+              )}
+            >
               <CardHeader>
-                <Clock className="h-10 w-10 text-white mb-2" />
+                <CreditCard className="h-10 w-10 text-white dark:text-white mb-2" /> {/* Ícone preto no modo escuro */}
+                <CardTitle>Pagamento Digital</CardTitle>
+                <CardDescription className="text-white/80 dark:text-white/60"> {/* Texto cinza escuro no modo escuro */}
+                  Compre seus tickets de forma rápida e segura através do nosso sistema.
+                </CardDescription>
+              </CardHeader>
+            </MotionCard>
+
+            <MotionCard 
+              variants={cardVariants}
+              whileHover={contraste === "alto" ? undefined : "hover"}
+              className={cn(
+                "bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white",
+                "dark:bg-white dark:text-white",
+                contraste === "alto" && "bg-black text-white"
+              )}
+            >
+              <CardHeader>
+                <Clock className="h-10 w-10 text-white dark:text-white mb-2" />
                 <CardTitle>Horários Flexíveis</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-white/80 dark:text-white/60">
                   Atendimento em diversos horários para sua conveniência.
                 </CardDescription>
               </CardHeader>
             </MotionCard>
 
-            <MotionCard variants={cardVariants} 
-            className="bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white" whileHover="hover">
+            <MotionCard 
+              variants={cardVariants} 
+              whileHover={contraste === "alto" ? undefined : "hover"}
+              className={cn(
+                "bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white",
+                "dark:bg-white dark:text-white",
+                contraste === "alto" && "bg-black text-white"
+              )}
+            >
               <CardHeader>
-                <Utensils className="h-10 w-10 mb-2" />
+                <Utensils className="h-10 w-10 text-white dark:text-white mb-2" />
                 <CardTitle>Cardápio Variado</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-white/80 dark:text-white/60">
                   Refeições balanceadas e nutritivas com opções vegetarianas.
                 </CardDescription>
               </CardHeader>
             </MotionCard>
 
-            <MotionCard variants={cardVariants}
-            className="bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white" whileHover="hover">
+            <MotionCard 
+              variants={cardVariants}
+              whileHover={contraste === "alto" ? undefined : "hover"}
+              className={cn(
+                "bg-gradient-to-br from-[#0B2F67] to-[#001B44] text-white",
+                "dark:bg-white dark:text-white",
+                contraste === "alto" && "bg-black text-white"
+              )}
+            >
               <CardHeader>
-                <Users className="h-10 w-10 mb-2" />
+                <Users className="h-10 w-10 text-white dark:text-white mb-2" />
                 <CardTitle>Preço Acessível</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-white/80 dark:text-white/60">
                   Valores subsidiados para estudantes e servidores.
                 </CardDescription>
               </CardHeader>
             </MotionCard>
           </motion.div>
-          </div>
+        </div>
       </section>
 
       {/* Depoimentos */}
-      <section className="py-24 bg-[#F4F7FA]">
+      <section className={cn(
+        "py-24 bg-[#F4F7FA] dark:bg-gradient-to-br dark:from-[#0a1a33] dark:to-[#051224] ",
+        contraste === "alto" && "bg-black"
+      )}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-semibold text-[#0B2F67] mb-12">O que dizem sobre nós</h2>
+          <h2 className={cn(
+            "text-3xl font-semibold text-[#0B2F67] dark:text-white mb-12",
+            contraste === "alto" && "text-white"
+          )}>
+            O que dizem sobre nós
+          </h2>
           <DepoimentosCarrossel />
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="bg-[#FFD200] text-[#0B2F67] py-20 relative overflow-hidden">
-        <svg className="absolute top-0 left-0 w-full rotate-180" viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M0,0 C360,100 720,100 1080,0 L1440,0 L1440,100 L0,100 Z"/></svg>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-3xl font-semibold mb-6 drop-shadow-lg">
-            Pronto para começar?
-          </h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto">
-            Crie sua conta agora e aproveite todas as facilidades do nosso sistema!
-          </p>
-          <Link href="/cadastro">
-            <Button size="lg" className="bg-white text-[#0B2F67] font-bold hover:bg-white/90 shadow-xl">
-              Criar Conta
-            </Button>
-          </Link>
-        </div>
-        <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M0,0 C360,100 720,100 1080,0 L1440,0 L1440,100 L0,100 Z"/></svg>
-      </section>
+<section
+  className={cn(
+    "relative bg-yellow-400 py-24 text-[#0B2F67] overflow-hidden",
+    contraste === "alto" && "bg-black text-white"
+  )}
+>
+    {/* SVG ONDA */}
+  <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] rotate-180  ">
+    <svg
+      className="relative block w-full h-[120px]"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1440 320"
+      preserveAspectRatio="none"
+    >
+      <path
+        fill={contraste === "alto" ? "#000000" : "#F4F7FA"}
+        d="M0,192L48,170.7C96,149,192,107,288,117.3C384,128,480,192,576,229.3C672,267,768,277,864,240C960,203,1056,117,1152,85.3C1248,53,1344,75,1392,85.3L1440,96V320H0Z"
+      />
+    </svg>
+  </div>
+  <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
+    <h2 className="text-4xl font-bold drop-shadow mb-4">
+      Pronto para começar?
+    </h2>
+    <p className="text-lg mb-8">
+      Faça login agora e aproveite todas as facilidades do nosso sistema!
+    </p>
+    <Link href="/cadastro">
+      <Button
+        size="lg"
+        className={cn(
+          "bg-white text-[#0B2F67] font-semibold shadow-lg hover:shadow-xl hover:bg-white/90 transition",
+          contraste === "alto" && "bg-white text-black border-2 border-white"
+        )}
+      >
+        Fazer Login
+      </Button>
+    </Link>
+  </div>
+   {/* SVG ONDA */}
+  <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
+    <svg
+      className="relative block w-full h-[120px]"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1440 320"
+      preserveAspectRatio="none"
+    >
+      <path
+        fill={contraste === "alto" ? "#000000" : "#0B2F67"}
+        d="M0,192L48,170.7C96,149,192,107,288,117.3C384,128,480,192,576,229.3C672,267,768,277,864,240C960,203,1056,117,1152,85.3C1248,53,1344,75,1392,85.3L1440,96V320H0Z"
+      />
+    </svg>
+  </div>
+
+</section>
+
+
     </div>
   )
 }
-

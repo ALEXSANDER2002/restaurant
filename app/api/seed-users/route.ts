@@ -7,6 +7,7 @@ export async function POST() {
   const usuarios = [
     { nome: "Administrador", email: "admin@gmail.com", senha: "admin123", tipo: "admin" },
     { nome: "Usuário", email: "user@gmail.com", senha: "12345678", tipo: "usuario" },
+    { nome: "Kalleb", email: "klbs@gmail.com", senha: "12345678", tipo: "usuario" },
   ]
 
   try {

@@ -26,12 +26,10 @@ export function BarraAcessibilidade() {
     if (typeof window !== "undefined") {
       const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
       const isSystemDark = darkModeMediaQuery.matches
-      
-      // Determinar se estamos no modo escuro
+
       const darkMode = tema === "escuro" || (tema === "sistema" && isSystemDark)
       setIsDarkMode(darkMode)
 
-      // Ouvir mudanças na preferência do sistema
       const handleChange = (e: MediaQueryListEvent) => {
         if (tema === "sistema") {
           setIsDarkMode(e.matches)
@@ -39,44 +37,39 @@ export function BarraAcessibilidade() {
       }
 
       darkModeMediaQuery.addEventListener('change', handleChange)
-      
-      return () => {
-        darkModeMediaQuery.removeEventListener('change', handleChange)
-      }
+      return () => darkModeMediaQuery.removeEventListener('change', handleChange)
     }
   }, [tema])
 
-  useEffect(() => {
-    if (!vLibrasCarregado && typeof window !== "undefined") {
-      const script = document.createElement("script")
-      script.src = "https://vlibras.gov.br/app/vlibras-plugin.js"
-      script.async = true
-      script.onload = () => {
-        // @ts-ignore
-        if (window.VLibras) {
-          // @ts-ignore
-          new window.VLibras.Widget({
-            rootPath: "/",
-            personalization: "https://vlibras.gov.br/app",
-            opacity: 0.9,
-            position: "L",
-          })
-          setVLibrasCarregado(true)
-        }
-      }
-      document.body.appendChild(script)
-      
-      return () => {
-        document.body.removeChild(script)
-      }
-    }
-  }, [vLibrasCarregado])
+  const carregarVLibras = () => {
+    if (vLibrasCarregado || typeof window === "undefined") return
 
-  const ativarVLibras = () => {
-    if (typeof window !== "undefined") {
-      const vlibrasBtn = document.querySelector('.vlibras-btn') as HTMLElement
-      if (vlibrasBtn) vlibrasBtn.click()
+    const jaExiste = document.querySelector('[vw]')
+    if (!jaExiste) {
+      const container = document.createElement("div")
+      container.setAttribute("vw", "")
+      container.className = "enabled"
+      container.innerHTML = `
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+          <div class="vw-plugin-top-wrapper"></div>
+        </div>
+      `
+      document.body.appendChild(container)
     }
+
+    const script = document.createElement("script")
+    script.src = "https://vlibras.gov.br/app/vlibras-plugin.js"
+    script.async = true
+    script.onload = () => {
+      // @ts-ignore
+      if (window.VLibras) {
+        // @ts-ignore
+        new window.VLibras.Widget("https://vlibras.gov.br/app")
+        setVLibrasCarregado(true)
+      }
+    }
+    document.body.appendChild(script)
   }
 
   return (
@@ -96,8 +89,8 @@ export function BarraAcessibilidade() {
               <span className="font-medium hidden sm:inline">Acessibilidade</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            sideOffset={6} 
+          <DropdownMenuContent
+            sideOffset={6}
             align="start"
             className={cn(
               "bg-white dark:bg-gray-800",
@@ -110,7 +103,7 @@ export function BarraAcessibilidade() {
             )}>
               {t("acessibilidade.ajustes")}
             </DropdownMenuLabel>
-            
+
             <DropdownMenuItem
               onSelect={() => alterarContraste(contraste === "normal" ? "alto" : "normal")}
               className="cursor-pointer"
@@ -127,31 +120,12 @@ export function BarraAcessibilidade() {
                 </div>
               </div>
             </DropdownMenuItem>
-            
-            <DropdownMenuItem 
-              onSelect={() => alterarTema(isDarkMode ? "claro" : "escuro")}
-              className="cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                {isDarkMode ? (
-                  <Sun className="h-4 w-4" />
-                ) : (
-                  <Moon className="h-4 w-4" />
-                )}
-                <div>
-                  {isDarkMode ? (
-                    <span>{t("acessibilidade.modoClaro")}</span>
-                  ) : (
-                    <span>{t("acessibilidade.modoEscuro")}</span>
-                  )}
-                </div>
-              </div>
-            </DropdownMenuItem>
-            
+
+
             <DropdownMenuSeparator className={contraste === "alto" ? "bg-contrast-high" : ""} />
-            
+
             <DropdownMenuItem
-              onSelect={ativarVLibras}
+              onSelect={carregarVLibras}
               className="cursor-pointer"
             >
               <div className="flex items-center gap-2">
@@ -159,12 +133,12 @@ export function BarraAcessibilidade() {
                 <span>{t("acessibilidade.vlibras")}</span>
               </div>
             </DropdownMenuItem>
-            
+
             <DropdownMenuSeparator className={contraste === "alto" ? "bg-contrast-high" : ""} />
-            
+
             <DropdownMenuItem asChild>
-              <a 
-                href="#conteudo-principal" 
+              <a
+                href="#conteudo-principal"
                 className={cn(
                   "flex items-center gap-2",
                   contraste === "alto" ? "text-yellow-300 underline" : ""
@@ -176,7 +150,7 @@ export function BarraAcessibilidade() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        
+
         <p className={cn(
           "hidden md:block text-[12px] text-gray-500 dark:text-gray-400",
           contraste === "alto" && "text-contrast-high"

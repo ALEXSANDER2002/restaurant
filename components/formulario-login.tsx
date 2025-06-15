@@ -80,7 +80,7 @@ export function FormularioLogin() {
           aria-required="true"
           aria-invalid={!!erro}
           autoComplete="email"
-          className="focus-visible:ring-2 focus-visible:ring-primary"
+          className="text-slate-900 placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>
 
@@ -101,7 +101,7 @@ export function FormularioLogin() {
             aria-required="true"
             aria-invalid={!!erro}
             autoComplete="current-password"
-            className="pr-10 focus-visible:ring-2 focus-visible:ring-primary"
+            className="text-slate-900 placeholder-slate-400 pr-10 focus-visible:ring-2 focus-visible:ring-primary"
           />
           <Button
             type="button"

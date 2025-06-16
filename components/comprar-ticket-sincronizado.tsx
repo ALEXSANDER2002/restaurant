@@ -19,6 +19,7 @@ import { generateTicketId, salvarTicket } from "@/services/ticket-sync-service"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { TicketQRCode } from "@/components/ticket-qrcode"
+import { useEffect } from "react"
 
 // Define ticket types and their prices
 const TICKET_TYPES = {
@@ -38,65 +39,76 @@ export function ComprarTicketSincronizado() {
   // const { usuario, perfil } = useAuth()
   const { mostrarFeedback } = useFeedback()
   const [data, setData] = useState<Date | undefined>(undefined)
-  const [quantidade, setQuantidade] = useState(1)
-  const [tipoTicket, setTipoTicket] = useState<"subsidiado" | "naoSubsidiado">("subsidiado")
+  const [quantidadeNaoSubsidiado, setQuantidadeNaoSubsidiado] = useState(0)
+  const [comprarSubsidiado, setComprarSubsidiado] = useState(false)
   const [carregando, setCarregando] = useState(false)
   const [sucesso, setSucesso] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
-  const [ticketComprado, setTicketComprado] = useState<any>(null)
+  const [ticketsComprados, setTicketsComprados] = useState<any[]>([])
 
-  // Get price based on selected ticket type
-  const precoUnitario = TICKET_TYPES[tipoTicket].price
-  const precoTotal = quantidade * precoUnitario
+  // Preço fixo
+  const precoSubsidiado = 2.0
+  const precoNaoSubsidiado = 13.0
+  const precoTotal = (comprarSubsidiado ? precoSubsidiado : 0) + (quantidadeNaoSubsidiado * precoNaoSubsidiado)
+
+  // Validação: só pode 1 subsidiado por dia
+  // (Aqui, para demo, não checamos se já existe no backend, mas pode ser feito via API)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // if (!perfil) {
-    //   setErro("Usuário não autenticado")
-    //   return
-    // }
-
     if (!data) {
       setErro("Selecione uma data para o almoço")
       return
     }
-
+    if (!comprarSubsidiado && quantidadeNaoSubsidiado < 1) {
+      setErro("Selecione pelo menos um ticket para comprar")
+      return
+    }
+    if (comprarSubsidiado && quantidadeNaoSubsidiado > 0 && quantidadeNaoSubsidiado < 1) {
+      setErro("Quantidade inválida de tickets não subsidiados")
+      return
+    }
     setCarregando(true)
     setSucesso(false)
     setErro(null)
-
     try {
-      // Criar novo ticket
-      const novoTicket = {
-        id: generateTicketId(),
-        usuario_id: "anon",
-        data: data.toISOString(),
-        quantidade,
-        valor_total: precoTotal,
-        status: "pendente" as const, // Começa como pendente para o admin confirmar
-        created_at: new Date().toISOString(),
-        subsidiado: tipoTicket === "subsidiado",
+      const tickets: any[] = []
+      if (comprarSubsidiado) {
+        tickets.push({
+          id: generateTicketId(),
+          usuario_id: "anon",
+          data: data instanceof Date ? data.toISOString() : data,
+          quantidade: 1,
+          valor_total: precoSubsidiado,
+          status: "pendente",
+          created_at: new Date().toISOString(),
+          subsidiado: true,
+        })
       }
-
-      // Salvar o ticket usando o serviço de sincronização
-      const { sucesso, erro: erroSalvar, ticket } = await salvarTicket(novoTicket)
-
-      if (!sucesso) {
-        throw new Error(erroSalvar || "Erro ao salvar ticket")
+      for (let i = 0; i < quantidadeNaoSubsidiado; i++) {
+        tickets.push({
+          id: generateTicketId(),
+          usuario_id: "anon",
+          data: data instanceof Date ? data.toISOString() : data,
+          quantidade: 1,
+          valor_total: precoNaoSubsidiado,
+          status: "pendente",
+          created_at: new Date().toISOString(),
+          subsidiado: false,
+        })
       }
-
-      // Armazenar o ticket comprado para exibir o QR code
-      setTicketComprado(ticket || novoTicket)
+      const ticketsSalvos: any[] = []
+      for (const ticket of tickets) {
+        const { sucesso, erro: erroSalvar, ticket: ticketSalvo } = await salvarTicket(ticket)
+        if (!sucesso) throw new Error(erroSalvar || "Erro ao salvar ticket")
+        ticketsSalvos.push(ticketSalvo || ticket)
+      }
+      setTicketsComprados(ticketsSalvos)
       setSucesso(true)
-
-      // Mostrar feedback
-      mostrarFeedback("Ticket comprado com sucesso!", "sucesso")
-
-      // Resetar o formulário
+      mostrarFeedback("Tickets comprados com sucesso!", "sucesso")
       setData(undefined)
-      setQuantidade(1)
-      setTipoTicket("subsidiado")
+      setQuantidadeNaoSubsidiado(0)
+      setComprarSubsidiado(false)
     } catch (error: any) {
       setErro("Erro ao processar a compra. Tente novamente.")
       console.error("Erro ao comprar ticket:", error)
@@ -105,25 +117,21 @@ export function ComprarTicketSincronizado() {
     }
   }
 
-  const voltarParaCompra = () => {
-    setTicketComprado(null)
-    setSucesso(false)
-  }
-
-  if (sucesso && ticketComprado) {
+  if (sucesso && ticketsComprados.length > 0) {
     return (
       <div className="space-y-4">
         <Alert className="bg-green-50 border-green-200">
           <CheckCircle2 className="h-4 w-4 text-green-600" />
           <AlertTitle className="text-green-800">Compra realizada com sucesso!</AlertTitle>
           <AlertDescription className="text-green-700">
-            Seu ticket de almoço foi adquirido. Você pode visualizá-lo no seu histórico de compras. O administrador irá
+            Seus tickets de almoço foram adquiridos. Você pode visualizá-los no seu histórico de compras. O administrador irá
             confirmar seu pedido em breve.
           </AlertDescription>
         </Alert>
-
-        <div className="mt-4">
-          <TicketQRCode ticket={ticketComprado} onClose={voltarParaCompra} />
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {ticketsComprados.map((ticket, idx) => (
+            <TicketQRCode key={ticket.id || idx} ticket={ticket} onClose={() => setSucesso(false)} />
+          ))}
         </div>
       </div>
     )
@@ -137,7 +145,6 @@ export function ComprarTicketSincronizado() {
           <AlertDescription>{erro}</AlertDescription>
         </Alert>
       )}
-
       <div className="space-y-2">
         <Label htmlFor="data">Data do Almoço</Label>
         <Popover>
@@ -169,81 +176,37 @@ export function ComprarTicketSincronizado() {
           </PopoverContent>
         </Popover>
       </div>
-
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="tipo-ticket">Tipo de Ticket</Label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-5 w-5">
-                  <HelpCircle className="h-4 w-4" />
-                  <span className="sr-only">Ajuda sobre tipos de ticket</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">
-                  Tickets subsidiados são disponíveis apenas para estudantes com subsídio aprovado. Tickets não
-                  subsidiados estão disponíveis para todos.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        <Label>Ticket Subsidiado</Label>
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="subsidiado"
+            checked={comprarSubsidiado}
+            onChange={e => setComprarSubsidiado(e.target.checked)}
+            className="form-checkbox h-5 w-5 text-blue-600"
+          />
+          <span className="text-sm">Comprar 1 ticket subsidiado (R$ 2,00)</span>
         </div>
-        <RadioGroup
-          value={tipoTicket}
-          onValueChange={(value) => setTipoTicket(value as "subsidiado" | "naoSubsidiado")}
-          className="flex flex-col space-y-2"
-        >
-          {Object.entries(TICKET_TYPES).map(([key, { label, price, description }]) => (
-            <div key={key} className="flex items-center space-x-2 rounded-md border p-3">
-              <RadioGroupItem value={key} id={`ticket-${key}`} />
-              <Label htmlFor={`ticket-${key}`} className="flex-1 cursor-pointer">
-                <div className="font-medium">
-                  {label} - R$ {price.toFixed(2)}
-                </div>
-                <div className="text-sm text-muted-foreground">{description}</div>
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
       </div>
-
       <div className="space-y-2">
-        <Label htmlFor="quantidade">Quantidade</Label>
+        <Label htmlFor="quantidade-nao-subsidiado">Tickets Não Subsidiados</Label>
         <Input
-          id="quantidade"
+          id="quantidade-nao-subsidiado"
           type="number"
-          min={1}
-          max={5}
-          value={quantidade}
-          onChange={(e) => setQuantidade(Number.parseInt(e.target.value))}
-          required
-          aria-required="true"
+          min={0}
+          value={quantidadeNaoSubsidiado}
+          onChange={e => setQuantidadeNaoSubsidiado(Number(e.target.value))}
+          className="w-32"
         />
-        <p className="text-sm text-muted-foreground">Máximo de 5 tickets por compra</p>
+        <span className="text-xs text-gray-500">R$ 13,00 cada. Quantos quiser por dia.</span>
       </div>
-
-      <div className="bg-muted p-4 rounded-md">
-        <div className="flex justify-between mb-2">
-          <span>Preço unitário:</span>
-          <span>R$ {precoUnitario.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between font-bold">
-          <span>Total:</span>
-          <span>R$ {precoTotal.toFixed(2)}</span>
-        </div>
+      <div className="flex items-center justify-between font-semibold text-lg">
+        <span>Total:</span>
+        <span>R$ {precoTotal.toFixed(2)}</span>
       </div>
-
-      <Button type="submit" className="w-full" disabled={!data || carregando}>
-        {carregando ? (
-          "Processando..."
-        ) : (
-          <>
-            <CreditCard className="mr-2 h-4 w-4" />
-            Finalizar Compra
-          </>
-        )}
+      <Button type="submit" className="w-full" disabled={carregando} aria-busy={carregando}>
+        {carregando ? "Processando..." : "Comprar"}
       </Button>
     </form>
   )

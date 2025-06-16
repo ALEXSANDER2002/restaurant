@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { useTema } from "./provedor-tema";
-import { Eye, Accessibility, Contrast, Menu, X, User } from "lucide-react";
+import { Eye, Accessibility, Contrast, Menu, X, User, Plus, Minus, RotateCcw, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   DropdownMenu,
@@ -25,7 +25,9 @@ export default function HeaderUNIFESSPACompleto() {
   const { usuario } = useAuth();
   const [vLibrasCarregado, setVLibrasCarregado] = useState(false);
   const [menuAberto, setMenuAberto] = useState(false);
+  const [fontSize, setFontSize] = useState(16);
   const pathname = usePathname();
+  const [openAcessibilidade, setOpenAcessibilidade] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -103,6 +105,11 @@ export default function HeaderUNIFESSPACompleto() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [contraste, alterarContraste, setMenuAberto]);
 
+  // Atualiza o tamanho da fonte globalmente
+  useEffect(() => {
+    document.documentElement.style.fontSize = fontSize + "px";
+  }, [fontSize]);
+
   const toggleMenu = () => setMenuAberto(!menuAberto);
 
   // Função para rolar com offset
@@ -120,6 +127,11 @@ export default function HeaderUNIFESSPACompleto() {
     }
   };
 
+  // Função para fechar o menu de acessibilidade
+  const fecharMenuAcessibilidade = () => {
+    setOpenAcessibilidade(false);
+  };
+
   return (
     <>
       {/* Barra de acessibilidade/topo - Responsiva com todos os ícones */}
@@ -132,57 +144,117 @@ export default function HeaderUNIFESSPACompleto() {
             <div className="flex flex-wrap items-center gap-1 sm:gap-2">
               {/* Botão Acessibilidade */}
               <div className="relative group" id="accessibility-menu">
-                <DropdownMenu>
+                <DropdownMenu open={openAcessibilidade} onOpenChange={setOpenAcessibilidade}>
                   <DropdownMenuTrigger asChild>
                     <button 
                       className={cn(
-                        "flex items-center gap-1 sm:gap-2 transition-colors px-2 py-1 sm:px-3 sm:py-1.5 rounded-md text-xs sm:text-sm font-medium",
-                        contraste === "alto" ? "bg-white text-black border-2 border-white hover:bg-white/90" : "bg-[#1351B4] hover:bg-[#2670E8]"
+                        "flex items-center gap-1 sm:gap-2 bg-[#1351B4] hover:bg-[#2670E8] px-2 sm:px-4 py-1.5 sm:py-2 rounded-md text-white font-semibold transition-colors text-xs sm:text-sm",
+                        contraste === "alto" ? "bg-white text-black border-2 border-white hover:bg-white/90" : ""
                       )}
-                      aria-expanded="false"
+                      style={{ minHeight: 32 }}
+                      aria-expanded={openAcessibilidade}
                       aria-haspopup="true"
                     >
-                      <i className="fas fa-universal-access text-sm" aria-hidden="true"></i>
-                      <span>Acessibilidade</span>
+                      <span className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white">
+                        <Accessibility className="text-[#1351B4] w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </span>
+                      <span className="font-semibold">Acessibilidade</span>
+                      <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1 text-white" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent sideOffset={6} align="start" className={cn(
-                    "bg-white",
+                    "bg-white w-80 max-w-[95vw] p-4 rounded-xl shadow-lg border text-gray-900",
                     contraste === "alto" ? "bg-black text-white border-2 border-white" : "dark:bg-gray-800"
                   )}>
-                    <DropdownMenuLabel className={cn(
-                      "text-xs font-semibold",
-                      contraste === "alto" ? "text-white" : "text-gray-600 dark:text-gray-400"
-                    )}>
-                      Ajustes de visualização
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem onSelect={() => alterarContraste(contraste === "normal" ? "alto" : "normal")}
-                      className="cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Contrast className="h-4 w-4" />
-                        <div>
-                          <span>Alto Contraste</span>
-                          {contraste === "alto" && (
-                            <span className="ml-2 text-xs bg-blue-500 px-1 rounded">Ativo</span>
-                          )}
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-semibold text-base">Ajustes de visualização</span>
+                        <button className="text-gray-400 hover:text-gray-600 dark:hover:text-white" onClick={fecharMenuAcessibilidade}>
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-300 mb-2">Personalize a aparência do site para melhor visualização</p>
+                      <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-2">
+                          <Contrast className="h-5 w-5" />
+                          <div>
+                            <div className="font-medium">Alto Contraste</div>
+                            <div className="text-xs text-gray-500">Melhora a visualização</div>
+                          </div>
+                        </div>
+                        <label className="inline-flex items-center cursor-pointer">
+                          <input type="checkbox" checked={contraste === "alto"} onChange={() => alterarContraste(contraste === "normal" ? "alto" : "normal")}
+                            className="sr-only peer" />
+                          <div className={cn(
+                            "w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-600 transition-all",
+                            contraste === "alto" && "bg-blue-600"
+                          )}></div>
+                          <span className="ml-2 text-sm">{contraste === "alto" ? "On" : "Off"}</span>
+                        </label>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-gray-100 text-blue-700 font-bold text-base">T</span>
+                          <div>
+                            <div className="font-medium">Tamanho da Fonte</div>
+                            <div className="text-xs text-gray-500">Atual: {fontSize}px</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            className="w-7 h-7 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50"
+                            onClick={() => setFontSize((f) => Math.max(12, f - 1))}
+                            disabled={fontSize <= 12}
+                            aria-label="Diminuir fonte"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <button
+                            className="w-7 h-7 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50"
+                            onClick={() => setFontSize(16)}
+                            disabled={fontSize === 16}
+                            aria-label="Restaurar fonte padrão"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </button>
+                          <button
+                            className="w-7 h-7 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50"
+                            onClick={() => setFontSize((f) => Math.min(24, f + 1))}
+                            disabled={fontSize >= 24}
+                            aria-label="Aumentar fonte"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={carregarVLibras} className="cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4" />
-                        <span>VLibras</span>
+                      <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-2">
+                          <Eye className="h-5 w-5" />
+                          <div>
+                            <div className="font-medium">VLibras</div>
+                            <div className="text-xs text-gray-500">Tradutor de Libras</div>
+                          </div>
+                        </div>
+                        <button className="text-blue-600 hover:underline text-sm font-medium" onClick={carregarVLibras}>Acessar</button>
                       </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <a href="#" onClick={(e) => { e.preventDefault(); scrollToSection("#main-content"); }} className="flex items-center gap-2">
-                        <Accessibility className="h-4 w-4" />
-                        <span>Ir para conteúdo</span>
-                      </a>
-                    </DropdownMenuItem>
+                      <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-2">
+                          <Accessibility className="h-5 w-5" />
+                          <div>
+                            <div className="font-medium">Ir para conteúdo</div>
+                            <div className="text-xs text-gray-500">Atalho: Alt+1</div>
+                          </div>
+                        </div>
+                        <button className="text-blue-600 hover:underline text-sm font-medium" onClick={() => scrollToSection("#main-content")}>Ir</button>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-500">
+                        <span>Atalhos de teclado:</span>
+                        <kbd className="bg-gray-100 px-2 py-1 rounded border">Alt+1</kbd>
+                        <kbd className="bg-gray-100 px-2 py-1 rounded border">Alt+2</kbd>
+                        <kbd className="bg-gray-100 px-2 py-1 rounded border">Alt+3</kbd>
+                        <kbd className="bg-gray-100 px-2 py-1 rounded border">Alt+4</kbd>
+                      </div>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

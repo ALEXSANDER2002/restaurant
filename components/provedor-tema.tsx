@@ -17,7 +17,7 @@ interface ConfiguracoesTema {
 const ContextoTema = createContext<ConfiguracoesTema | undefined>(undefined)
 
 export function ProvedorTema({ children, ...props }: ThemeProviderProps) {
-  const [tema, setTema] = useState<ModoTema>("sistema")
+  const [tema, setTema] = useState<ModoTema>("claro")
   const [contraste, setContraste] = useState<ModoContraste>("normal")
   const [isMounted, setIsMounted] = useState(false)
 
@@ -48,15 +48,16 @@ export function ProvedorTema({ children, ...props }: ThemeProviderProps) {
   }
 
   // Sincronizar tema com next-themes
-  const resolvedTheme = tema === "sistema" ? "system" : tema === "claro" ? "light" : "dark"
+  const resolvedTheme = tema === "claro" ? "light" : tema === "escuro" ? "dark" : "light"
 
   return (
     <ContextoTema.Provider value={{ tema, alterarTema, contraste, alterarContraste }}>
       <NextThemesProvider
         attribute="class"
-        defaultTheme={resolvedTheme}
-        enableSystem
-        forcedTheme={isMounted ? undefined : resolvedTheme} // Evitar flash de tema incorreto
+        defaultTheme="light" // Forçando o tema light como padrão
+        forcedTheme={isMounted ? undefined : "light"} // Forçando light até a montagem
+        disableTransitionOnChange // Evita transições indesejadas
+        enableSystem={false} // Desabilitamos a detecção do tema do sistema
         {...props}
       >
         <TemaAplicador contraste={contraste}>

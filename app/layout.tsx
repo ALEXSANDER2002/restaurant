@@ -20,7 +20,10 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Restaurante Universitário",
   description: "Sistema de venda de almoço do Restaurante Universitário",
-  generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: "/SIRUS.png",
+  },
 }
 
 export default function RootLayout({

@@ -92,6 +92,10 @@ body {
     @apply bg-background text-foreground;
   }
 }
+html.alto-contraste body {
+  @apply bg-background text-foreground;
+}
+
 
 /* Estilos da barra de rolagem */
 .scrollbar-thin::-webkit-scrollbar {

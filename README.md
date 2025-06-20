@@ -216,14 +216,28 @@ Integração completa com Mercado Pago:
 # Deploy automático a cada push
 ```
 
-### Docker (Alternativo)
-```bash
-# Build da imagem
-docker build -t restaurant-app .
+### Docker 🐳
 
-# Executar container
-docker run -p 3000:3000 restaurant-app
+#### Desenvolvimento
+```bash
+# Build e start com docker-compose
+docker-compose up -d --build
+
+# Ver logs
+docker-compose logs -f
 ```
+
+#### Produção
+```bash
+# Build e start com configuração de produção
+docker-compose -f docker-compose.prod.yml up -d --build
+
+# Deploy automatizado
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+```
+
+Para instruções completas de deploy na VPS, veja [DOCKER_DEPLOY.md](DOCKER_DEPLOY.md).
 
 ## 🤝 Contribuindo
 

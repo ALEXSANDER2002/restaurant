@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # Banco de dados PostgreSQL para produção
+  postgres:
+    image: postgres:15-alpine
+    container_name: restaurant_postgres_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: restaurant
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_secure_password}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - restaurant_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    # Para produção, não expor porta diretamente
+    # ports:
+    #   - "5432:5432"
+
+  # Aplicação Next.js para produção
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: restaurant_app_prod
+    restart: unless-stopped
+    environment:
+      # Banco de dados
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres_secure_password}@postgres:5432/restaurant
+      
+      # Node.js
+      NODE_ENV: production
+      
+      # Next.js
+      NEXT_TELEMETRY_DISABLED: 1
+      
+      # Mercado Pago (usar variáveis do .env)
+      MERCADO_PAGO_ACCESS_TOKEN: ${MERCADO_PAGO_ACCESS_TOKEN}
+      MERCADO_PAGO_PUBLIC_KEY: ${MERCADO_PAGO_PUBLIC_KEY}
+      MERCADO_PAGO_CLIENT_ID: ${MERCADO_PAGO_CLIENT_ID}
+      MERCADO_PAGO_CLIENT_SECRET: ${MERCADO_PAGO_CLIENT_SECRET}
+      MERCADO_PAGO_WEBHOOK_SECRET: ${MERCADO_PAGO_WEBHOOK_SECRET}
+      
+      # URL da aplicação (deve ser o domínio real)
+      APP_URL: https://${DOMAIN}
+      
+      # Autenticação
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: https://${DOMAIN}
+      
+      # Google Gemini AI
+      GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - restaurant_network
+    volumes:
+      - ./uploads:/app/uploads
+    command: >
+      sh -c "
+        echo 'Aguardando banco de dados...' &&
+        sleep 15 &&
+        echo 'Executando migrações...' &&
+        npx drizzle-kit push &&
+        echo 'Populando dados iniciais...' &&
+        echo 'Iniciando aplicação...' &&
+        node server.js
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # Para produção, não expor porta diretamente (usar nginx)
+    # ports:
+    #   - "3000:3000"
+
+  # Nginx para proxy reverso em produção
+  nginx:
+    image: nginx:alpine
+    container_name: restaurant_nginx_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - restaurant_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Watchtower para atualizações automáticas (opcional)
+  watchtower:
+    image: containrrr/watchtower
+    container_name: restaurant_watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=300
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_STOPPED=true
+    command: --interval 300 restaurant_app_prod restaurant_nginx_prod
+    # Descomente se quiser atualizações automáticas
+    # profiles:
+    #   - watchtower
+
+volumes:
+  postgres_data_prod:
+    driver: local
+  nginx_cache:
+    driver: local
+
+networks:
+  restaurant_network:
+    driver: bridge 

@@ -22,6 +22,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  output: 'standalone', // Necessário para Docker
   webpack: (config) => {
     config.output.hashFunction = "xxhash64"
     return config

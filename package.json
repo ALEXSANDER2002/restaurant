@@ -8,7 +8,12 @@
     "start": "next start",
     "lint": "next lint",
     "db:gen": "drizzle-kit generate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "docker:dev": "docker-compose up -d --build",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up -d --build",
+    "docker:logs": "docker-compose logs -f",
+    "docker:stop": "docker-compose down",
+    "docker:clean": "docker-compose down -v && docker system prune -f"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -83,7 +88,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/string-similarity": "^4.0.2",
-    "drizzle-kit": "^0.20.8",
+    "drizzle-kit": "^0.31.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"

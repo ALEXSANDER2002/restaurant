@@ -1,23 +1,29 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ComprarTicketSincronizado } from "@/components/comprar-ticket-sincronizado"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProtecaoRota } from "@/components/protecao-rota"
 import { buscarTicketsUsuario } from "@/services/ticket-sync-service"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { format, parseISO } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { useAuth } from "@/contexts/auth-context"
+import { CheckCircle, XCircle, AlertCircle } from "lucide-react"
 
-export default function UsuarioPage() {
+function UsuarioPageContent() {
   const { usuario, carregando: carregandoSessao } = useAuth()
+  const searchParams = useSearchParams()
+  const statusPagamento = searchParams.get('pagamento')
 
   const usuarioId = usuario?.id || null
 
   const [tickets, setTickets] = useState<any[]>([])
   const [carregando, setCarregando] = useState(true)
+  const [mostrarAlerta, setMostrarAlerta] = useState(false)
 
   useEffect(() => {
     if (!usuarioId) return
@@ -35,9 +41,52 @@ export default function UsuarioPage() {
     fetchTickets()
   }, [usuarioId])
 
+  // Mostrar alerta baseado no status do pagamento
+  useEffect(() => {
+    if (statusPagamento) {
+      setMostrarAlerta(true)
+      // Esconder alerta após 10 segundos
+      const timer = setTimeout(() => {
+        setMostrarAlerta(false)
+      }, 10000)
+      return () => clearTimeout(timer)
+    }
+  }, [statusPagamento])
+
+  const renderAlertaPagamento = () => {
+    if (!mostrarAlerta || !statusPagamento) return null
+
+    switch (statusPagamento) {
+      case 'sucesso':
+        return (
+          <Alert className="mb-6 border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertTitle className="text-green-800">Pagamento Confirmado!</AlertTitle>
+            <AlertDescription className="text-green-700">
+              Seu pagamento foi processado com sucesso. Os tickets estão disponíveis no seu histórico.
+            </AlertDescription>
+          </Alert>
+        )
+      case 'cancelado':
+        return (
+          <Alert className="mb-6 border-yellow-200 bg-yellow-50">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800">Pagamento Cancelado</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              O pagamento foi cancelado. Você pode tentar novamente quando quiser.
+            </AlertDescription>
+          </Alert>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
     <ProtecaoRota>
-      <Tabs defaultValue="comprar" className="w-full max-w-3xl mx-auto py-6">
+      <div className="w-full max-w-3xl mx-auto py-6">
+        {renderAlertaPagamento()}
+        <Tabs defaultValue="comprar" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="comprar">Comprar Ticket</TabsTrigger>
           <TabsTrigger value="historico">Histórico</TabsTrigger>
@@ -85,7 +134,7 @@ export default function UsuarioPage() {
                           <TableRow key={t.id}>
                             <TableCell>{format(parseISO(t.data), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                             <TableCell>{t.quantidade}</TableCell>
-                            <TableCell>R$ {t.valor_total.toFixed(2)}</TableCell>
+                            <TableCell>R$ {Number(t.valor_total).toFixed(2)}</TableCell>
                             <TableCell>{t.status}</TableCell>
                           </TableRow>
                         ))}
@@ -97,8 +146,17 @@ export default function UsuarioPage() {
             </Card>
           )}
         </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
     </ProtecaoRota>
+  )
+}
+
+export default function UsuarioPage() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <UsuarioPageContent />
+    </Suspense>
   )
 }
 

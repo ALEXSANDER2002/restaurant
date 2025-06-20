@@ -32,6 +32,7 @@ export const tickets = pgTable("tickets", {
   subsidiado: boolean("subsidiado").default(false),
   utilizado: boolean("utilizado").default(false),
   data_utilizacao: timestamp("data_utilizacao", { withTimezone: true }),
+  external_payment_id: varchar("external_payment_id", { length: 100 }),
 })
 
 // Relations (optional for later joins)

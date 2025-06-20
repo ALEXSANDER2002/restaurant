@@ -9,19 +9,25 @@ export async function GET(req: NextRequest) {
   const usuarioId = searchParams.get("usuario_id")
 
   try {
-    let query = db
+    const baseSelect = db
       .select({
-        ...tickets,
+        id: tickets.id,
+        usuario_id: tickets.usuario_id,
+        data: tickets.data,
+        quantidade: tickets.quantidade,
+        valor_total: tickets.valor_total,
+        status: tickets.status,
+        created_at: tickets.created_at,
+        subsidiado: tickets.subsidiado,
         nome: perfis.nome,
         email: perfis.email,
       })
       .from(tickets)
       .leftJoin(perfis, eq(perfis.id, tickets.usuario_id))
-      .orderBy(desc(tickets.created_at))
 
-    if (usuarioId) {
-      query = query.where(eq(tickets.usuario_id, usuarioId))
-    }
+    const query = usuarioId
+      ? baseSelect.where(eq(tickets.usuario_id, usuarioId)).orderBy(desc(tickets.created_at))
+      : baseSelect.orderBy(desc(tickets.created_at))
 
     const data = await query
 
@@ -41,10 +47,10 @@ export async function POST(req: NextRequest) {
       id: body.id ?? crypto.randomUUID(),
       usuario_id: body.usuario_id,
       data: body.data,
-      quantidade: body.quantidade,
-      valor_total: body.valor_total,
+      quantidade: String(body.quantidade),
+      valor_total: String(body.valor_total),
       status: body.status ?? "pendente",
-      created_at: new Date().toISOString(),
+      created_at: new Date(),
       subsidiado: body.subsidiado ?? false,
     }
 

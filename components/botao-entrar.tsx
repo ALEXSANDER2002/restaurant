@@ -10,9 +10,11 @@ export function BotaoEntrar() {
 
   return (
     <Link href="/login" passHref legacyBehavior>
-      <Button as="a" className="gap-2">
-        <LogIn className="h-4 w-4" />
-        <span>{t("nav.entrar")}</span>
+      <Button className="gap-2" asChild>
+        <a>
+          <LogIn className="h-4 w-4" />
+          <span>{t("nav.entrar")}</span>
+        </a>
       </Button>
     </Link>
   )

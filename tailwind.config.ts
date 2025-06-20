@@ -67,17 +67,17 @@ const config = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 },
+          to: { height: "0" },
         },
         // Adicionando animação para o modo de alto contraste
         "high-contrast-pulse": {
-          '0%, 100%': { opacity: 1 },
-          '50%': { opacity: 0.8 },
+          '0%, 100%': { opacity: "1" },
+          '50%': { opacity: "0.8" },
         },
       },
       animation: {
@@ -104,7 +104,7 @@ const config = {
   plugins: [
     require("tailwindcss-animate"),
     // Plugin para estilos de alto contraste
-    function ({ addVariant, addUtilities }) {
+    function ({ addVariant, addUtilities }: any) {
       addVariant('contrast-high', '.contrast-high &');
       
       addUtilities({

@@ -1,4 +1,5 @@
-import { Pool } from "pg"
+import pg from "pg"
+const { Pool } = pg
 import { drizzle } from "drizzle-orm/node-postgres"
 
 /**
@@ -20,10 +21,10 @@ if (!connectionString) {
 
 const finalConn = connectionString.trim()
 
-// Pool com SSL habilitado em produção (required pelo Supabase)
+// Pool com SSL desabilitado para desenvolvimento local
 const pool = new Pool({
   connectionString: finalConn,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+  ssl: false, // Forçar SSL desabilitado para desenvolvimento
 })
 
 // Cria instância Drizzle sobre o pool

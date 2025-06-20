@@ -41,7 +41,14 @@ export async function criarUsuario(
   try {
     const inserted = await db
       .insert(perfis)
-      .values({ id: crypto.randomUUID(), nome, email, tipo_usuario: tipo, status })
+      .values({
+        id: crypto.randomUUID(),
+        nome,
+        email,
+        password_hash: "", // TODO: definir hash
+        tipo_usuario: tipo,
+        status,
+      })
       .returning()
 
     return { usuario: inserted[0], erro: null }
@@ -64,7 +71,7 @@ export async function atualizarUsuario(
       ...(dados.nome && { nome: dados.nome }),
       ...(dados.tipo && { tipo_usuario: dados.tipo }),
       ...(dados.status && { status: dados.status }),
-      updated_at: new Date().toISOString(),
+      updated_at: new Date(),
     }).where(eq(perfis.id, id)).returning()
 
     return { usuario: updated[0], erro: null }

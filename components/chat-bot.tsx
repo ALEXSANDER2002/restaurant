@@ -20,7 +20,7 @@ export function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Olá! Sou o assistente do Restaurante Universitário. Como posso ajudar você hoje?",
+      content: "Olá! Sou o assistente virtual do Restaurante Universitário da UNIFESSPA! 🍽️ Posso ajudar com informações sobre horários, cardápio, preços, localização e muito mais. Como posso ajudar você hoje?",
       role: "assistant",
     },
   ])
@@ -113,62 +113,90 @@ export function ChatBot() {
       })
     }, 300)
 
-    // Simulate a small delay for a more natural conversation flow
-    setTimeout(() => {
-      try {
-        // Get response based on keywords
-        const response = getResponseByKeywords(input.toLowerCase())
+    // Processar mensagem com IA
+    try {
+      // Fazer chamada para API do chat com IA
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+          messages: messages.concat([userMessage])
+        }),
+      });
 
-        // Clear intervals
-        if (progressInterval.current) clearInterval(progressInterval.current)
-        if (typingInterval.current) clearInterval(typingInterval.current)
+      const data = await response.json();
 
-        setLoadingProgress(100)
+      // Clear intervals
+      if (progressInterval.current) clearInterval(progressInterval.current)
+      if (typingInterval.current) clearInterval(typingInterval.current)
 
-        // Add AI response with slight delay for transition
-        setTimeout(() => {
-          const assistantMessageId = (Date.now() + 1).toString()
-          const assistantMessage: Message = {
-            id: assistantMessageId,
-            content: response,
-            role: "assistant",
-            isNew: true,
-          }
+      setLoadingProgress(100)
 
-          setMessages((prev) => [...prev, assistantMessage])
-          setIsLoading(false)
-
-          // Remove isNew flag after animation
-          setTimeout(() => {
-            setMessages((prev) =>
-              prev.map((msg) => {
-                if (msg.id === userMessageId || msg.id === assistantMessageId) {
-                  return { ...msg, isNew: false }
-                }
-                return msg
-              }),
-            )
-          }, 2000)
-        }, 300)
-      } catch (error) {
-        console.error("Error processing message:", error)
-
-        // Clear intervals
-        if (progressInterval.current) clearInterval(progressInterval.current)
-        if (typingInterval.current) clearInterval(typingInterval.current)
-
-        // Add error message
-        const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: "Desculpe, tive um problema ao processar sua mensagem. Tente novamente mais tarde.",
+      // Add AI response with slight delay for transition
+      setTimeout(() => {
+        const assistantMessageId = (Date.now() + 1).toString()
+        const assistantMessage: Message = {
+          id: assistantMessageId,
+          content: data.response || 'Desculpe, não consegui processar sua mensagem.',
           role: "assistant",
           isNew: true,
         }
 
-        setMessages((prev) => [...prev, errorMessage])
+        setMessages((prev) => [...prev, assistantMessage])
         setIsLoading(false)
-      }
-    }, 2000) // 2000ms delay to simulate thinking
+
+        // Remove isNew flag after animation
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((msg) => {
+              if (msg.id === userMessageId || msg.id === assistantMessageId) {
+                return { ...msg, isNew: false }
+              }
+              return msg
+            }),
+          )
+        }, 2000)
+      }, 300)
+    } catch (error) {
+      console.error("Error processing message:", error)
+
+      // Clear intervals
+      if (progressInterval.current) clearInterval(progressInterval.current)
+      if (typingInterval.current) clearInterval(typingInterval.current)
+
+      // Fallback to keyword-based response in case of API error
+      const fallbackResponse = getResponseByKeywords(input.toLowerCase())
+      
+      setLoadingProgress(100)
+
+      setTimeout(() => {
+        const assistantMessageId = (Date.now() + 1).toString()
+        const assistantMessage: Message = {
+          id: assistantMessageId,
+          content: fallbackResponse,
+          role: "assistant",
+          isNew: true,
+        }
+
+        setMessages((prev) => [...prev, assistantMessage])
+        setIsLoading(false)
+
+        // Remove isNew flag after animation
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((msg) => {
+              if (msg.id === userMessageId || msg.id === assistantMessageId) {
+                return { ...msg, isNew: false }
+              }
+              return msg
+            }),
+          )
+        }, 2000)
+      }, 300)
+    }
   }
 
   const toggleMinimize = () => {
@@ -195,7 +223,7 @@ export function ChatBot() {
       setMessages([
         {
           id: "1",
-          content: "Olá! Sou o assistente do Restaurante Universitário. Como posso ajudar você hoje?",
+          content: "Olá! Sou o assistente virtual do Restaurante Universitário da UNIFESSPA! 🍽️ Posso ajudar com informações sobre horários, cardápio, preços, localização e muito mais. Como posso ajudar você hoje?",
           role: "assistant",
         },
       ])

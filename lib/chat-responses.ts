@@ -10,12 +10,12 @@ const responseDatabase: ResponseData[] = [
   {
     keywords: ["horário", "horarios", "hora", "abre", "fecha", "funcionamento", "expediente"],
     response:
-      "O Restaurante Universitário funciona de segunda a sexta-feira, nos seguintes horários:\n\n• Almoço: 11h às 14h\n• Jantar: 17h às 19h30\n\nEstamos fechados aos finais de semana e feriados.",
+      "O Restaurante Universitário da UNIFESSPA funciona de segunda a sexta-feira:\n\n🕐 **Horários:**\n• Almoço: 11h00 às 14h00\n• Jantar: 17h00 às 19h30\n\n❌ Fechado aos finais de semana e feriados.\n\n📍 Localizado no Campus de Marabá - Folha 31, Quadra 07, Lote Especial, Nova Marabá.",
   },
   {
     keywords: ["preço", "precos", "valor", "custo", "quanto custa", "pagar"],
     response:
-      "Os preços das refeições no RU são:\n\n• Estudantes: R$ 3,00\n• Professores: R$ 10,00\n• Funcionários: R$ 10,00\n• Visitantes: R$ 15,00",
+      "💰 **Preços das refeições no RU da UNIFESSPA:**\n\n• 🎓 Estudantes: R$ 3,00\n• 👨‍🏫 Professores: R$ 10,00\n• 👷‍♂️ Funcionários: R$ 10,00\n• 👥 Visitantes: R$ 15,00\n\n💡 **Dica:** Estudantes em vulnerabilidade social podem solicitar auxílio alimentação junto à PRAE para refeições gratuitas ou com desconto!",
   },
   {
     keywords: [
@@ -44,9 +44,9 @@ const responseDatabase: ResponseData[] = [
       "Aceitamos as seguintes formas de pagamento:\n\n• Cartão do estudante (com créditos)\n• Dinheiro\n• Pix\n\nNão aceitamos cartões de crédito ou débito.",
   },
   {
-    keywords: ["localização", "localizacao", "onde", "endereço", "endereco", "lugar", "fica"],
+    keywords: ["localização", "localizacao", "onde", "endereço", "endereco", "lugar", "fica", "unifesspa", "marabá"],
     response:
-      "O Restaurante Universitário está localizado no Bloco Central do Campus Universitário, próximo à Biblioteca Central. É fácil de encontrar, pois há placas indicativas por todo o campus.",
+      "📍 **Localização do RU da UNIFESSPA:**\n\n🏛️ **Campus Principal - Marabá:**\nFolha 31, Quadra 07, Lote Especial\nNova Marabá - PA\n\n🗺️ O RU fica no Bloco Central do Campus, próximo à Biblioteca. Há placas indicativas por todo o campus para facilitar a localização.\n\n🚌 **Transporte:** Acessível por transporte público e possui estacionamento para veículos.",
   },
   {
     keywords: ["fila", "filas", "lotado", "cheio", "espera", "demora"],

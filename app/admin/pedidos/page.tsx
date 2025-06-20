@@ -4,7 +4,7 @@ import { ProtecaoRota } from "@/components/protecao-rota"
 
 export default function PaginaPedidos() {
   return (
-    <ProtecaoRota tipoPermitido="admin">
+    <ProtecaoRota>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Gerenciamento de Pedidos</h1>
 

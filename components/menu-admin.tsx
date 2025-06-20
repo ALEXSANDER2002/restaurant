@@ -4,13 +4,14 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, ClipboardList, Users, QrCode, Database, Settings } from "lucide-react"
+import { LayoutDashboard, ClipboardList, Users, QrCode, Database, Settings, Utensils } from "lucide-react"
 
 export function MenuAdmin() {
   const pathname = usePathname()
 
   const links = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/cardapio", label: "Cardápio", icon: Utensils },
     { href: "/admin/pedidos", label: "Pedidos", icon: ClipboardList },
     { href: "/admin/usuarios", label: "Usuários", icon: Users },
     { href: "/admin/validar-tickets", label: "Validar Tickets", icon: QrCode },

@@ -25,6 +25,17 @@ export function TicketQRCode({ ticket, onClose }: TicketQRCodeProps) {
   const { t } = useIdioma()
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("")
 
+  // Função auxiliar para formatar valor monetário de forma segura
+  const formatarValor = (valor: any): string => {
+    if (valor === null || valor === undefined) return "0,00"
+    
+    const numeroValor = typeof valor === 'string' ? parseFloat(valor) : valor
+    
+    if (isNaN(numeroValor)) return "0,00"
+    
+    return numeroValor.toFixed(2).replace('.', ',')
+  }
+
   // Dados que serão codificados no QR code
   const ticketData = {
     id: ticket.id,
@@ -143,7 +154,7 @@ export function TicketQRCode({ ticket, onClose }: TicketQRCodeProps) {
           <p className="font-medium">ID: {ticket.id}</p>
           <p>Data: {format(parseISO(ticket.data), "dd/MM/yyyy", { locale: ptBR })}</p>
           <p>Quantidade: {ticket.quantidade}</p>
-          <p>Valor: R$ {ticket.valor_total.toFixed(2)}</p>
+          <p>Valor: R$ {formatarValor(ticket.valor_total)}</p>
           <p>Tipo: {ticket.subsidiado ? "Subsidiado" : "Não Subsidiado"}</p>
         </div>
 

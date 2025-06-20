@@ -33,24 +33,17 @@ export default function PaginaAdmin() {
             </TabsList>
 
             <TabsContent value="dashboard">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                <div className="sm:col-span-2 lg:col-span-2">
-                  <Card className="shadow-sm border-t-4 border-t-primary/30">
-                    <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-muted/30">
-                      <div>
-                        <CardTitle>Dashboard de Vendas</CardTitle>
-                        <CardDescription>Visualize estatísticas e gráficos de vendas de almoço</CardDescription>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <DashboardVendas />
-                    </CardContent>
-                  </Card>
-                </div>
-                <div>
-                  {/* <EstatisticasTempoReal /> */}
-                </div>
-              </div>
+              <Card className="shadow-sm border-t-4 border-t-primary/30 w-full">
+                <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-muted/30">
+                  <div>
+                    <CardTitle>Dashboard de Vendas</CardTitle>
+                    <CardDescription>Visualize estatísticas e gráficos de vendas de almoço</CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <DashboardVendas />
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="pedidos">

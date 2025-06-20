@@ -45,4 +45,22 @@ export const ticketsRelations = relations(tickets, ({ one }) => ({
     fields: [tickets.usuario_id],
     references: [perfis.id],
   }),
-})) 
+}))
+
+// Tabela de cardápio semanal
+export const cardapio = pgTable("cardapio", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dia_semana: varchar("dia_semana", { length: 20 }).notNull(), // segunda, terca, quarta, quinta, sexta
+  prato_principal: text("prato_principal").notNull(),
+  acompanhamentos: text("acompanhamentos").notNull(),
+  saladas: text("saladas").notNull(),
+  sobremesa: text("sobremesa").notNull(),
+  bebida: text("bebida").notNull(),
+  opcao_vegetariana: text("opcao_vegetariana").notNull(),
+  observacoes: text("observacoes"),
+  ativo: boolean("ativo").default(true),
+  semana_inicio: timestamp("semana_inicio", { withTimezone: true }).notNull(),
+  semana_fim: timestamp("semana_fim", { withTimezone: true }).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+})

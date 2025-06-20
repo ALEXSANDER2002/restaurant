@@ -133,33 +133,69 @@ export function DashboardVendas() {
 
   if (carregando) {
     return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total de Vendas</CardTitle>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <h2 className="text-2xl font-bold">Dashboard de Vendas</h2>
+          <div className="flex items-center gap-2">
+            <Select disabled>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Carregando..." />
+              </SelectTrigger>
+            </Select>
+            <Button variant="outline" size="sm" disabled className="flex items-center gap-1">
+              <RefreshCw className="h-3 w-3" />
+              Atualizar
+            </Button>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <Card className="border-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-semibold text-gray-700">Total de Vendas</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Loading size="sm" />
+            <CardContent className="pt-0">
+              <div className="h-12 flex items-center">
+                <Loading size="sm" />
+              </div>
+              <p className="text-sm text-muted-foreground">tickets vendidos</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
+          <Card className="border-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-semibold text-gray-700">Valor Total</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Loading size="sm" />
+            <CardContent className="pt-0">
+              <div className="h-12 flex items-center">
+                <Loading size="sm" />
+              </div>
+              <p className="text-sm text-muted-foreground">receita total</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Tickets Subsidiados</CardTitle>
+          <Card className="border-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-semibold text-gray-700">Tickets Subsidiados</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Loading size="sm" />
+            <CardContent className="pt-0">
+              <div className="h-12 flex items-center">
+                <Loading size="sm" />
+              </div>
+              <p className="text-sm text-muted-foreground">R$ 2,00 cada</p>
+            </CardContent>
+          </Card>
+          <Card className="border-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-semibold text-gray-700">Tickets Não Subsidiados</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="h-12 flex items-center">
+                <Loading size="sm" />
+              </div>
+              <p className="text-sm text-muted-foreground">R$ 13,00 cada</p>
             </CardContent>
           </Card>
         </div>
+        
         <Card>
           <CardHeader>
             <CardTitle>Carregando dados...</CardTitle>
@@ -191,9 +227,12 @@ export function DashboardVendas() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold">Dashboard de Vendas</h2>
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Dashboard de Vendas</h2>
+          <p className="text-muted-foreground mt-1">Visualize estatísticas e gráficos de vendas em tempo real</p>
+        </div>
         <div className="flex items-center gap-2">
           <Select value={periodo} onValueChange={handlePeriodoChange}>
             <SelectTrigger className="w-32">
@@ -222,53 +261,54 @@ export function DashboardVendas() {
       )}
 
       {/* Cards de estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total de Vendas</CardTitle>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <Card className="border-2 hover:border-blue-200 transition-colors duration-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold text-gray-700">Total de Vendas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dados.totalVendas}</div>
-            <p className="text-xs text-muted-foreground">tickets vendidos</p>
+          <CardContent className="pt-0">
+            <div className="text-4xl lg:text-5xl font-bold text-blue-600 mb-2">{dados.totalVendas}</div>
+            <p className="text-sm text-muted-foreground">tickets vendidos</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
+        <Card className="border-2 hover:border-green-200 transition-colors duration-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold text-gray-700">Valor Total</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatarValor(dados.valorTotal)}</div>
-            <p className="text-xs text-muted-foreground">receita total</p>
+          <CardContent className="pt-0">
+            <div className="text-4xl lg:text-5xl font-bold text-green-600 mb-2">{formatarValor(dados.valorTotal)}</div>
+            <p className="text-sm text-muted-foreground">receita total</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Tickets Subsidiados</CardTitle>
+        <Card className="border-2 hover:border-purple-200 transition-colors duration-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold text-gray-700">Tickets Subsidiados</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dados.ticketsSubsidiados}</div>
-            <p className="text-xs text-muted-foreground">R$ 2,00 cada</p>
+          <CardContent className="pt-0">
+            <div className="text-4xl lg:text-5xl font-bold text-purple-600 mb-2">{dados.ticketsSubsidiados}</div>
+            <p className="text-sm text-muted-foreground">R$ 2,00 cada</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Tickets Não Subsidiados</CardTitle>
+        <Card className="border-2 hover:border-orange-200 transition-colors duration-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold text-gray-700">Tickets Não Subsidiados</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dados.ticketsNaoSubsidiados}</div>
-            <p className="text-xs text-muted-foreground">R$ 13,00 cada</p>
+          <CardContent className="pt-0">
+            <div className="text-4xl lg:text-5xl font-bold text-orange-600 mb-2">{dados.ticketsNaoSubsidiados}</div>
+            <p className="text-sm text-muted-foreground">R$ 13,00 cada</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Gráficos */}
-      <Tabs defaultValue="vendas" className="w-full">
-        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-4">
-          <TabsTrigger value="vendas">Vendas</TabsTrigger>
-          <TabsTrigger value="status">Status</TabsTrigger>
-          <TabsTrigger value="tipos">Tipos</TabsTrigger>
-          <TabsTrigger value="usuarios">Top Usuários</TabsTrigger>
-        </TabsList>
+      <div className="bg-white rounded-lg border-2 p-6">
+        <Tabs defaultValue="vendas" className="w-full">
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-4 mb-6">
+            <TabsTrigger value="vendas" className="text-sm font-medium">📊 Vendas</TabsTrigger>
+            <TabsTrigger value="status" className="text-sm font-medium">📈 Status</TabsTrigger>
+            <TabsTrigger value="tipos" className="text-sm font-medium">🎯 Tipos</TabsTrigger>
+            <TabsTrigger value="usuarios" className="text-sm font-medium">👥 Top Usuários</TabsTrigger>
+          </TabsList>
 
         <TabsContent value="vendas">
           <Card>
@@ -408,6 +448,7 @@ export function DashboardVendas() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   )
 }

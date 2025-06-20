@@ -9,6 +9,7 @@ import { useRef } from "react"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 import { DepoimentosCarrossel } from "@/components/depoimentos-carrossel"
 import { HeroImage } from "@/components/hero-image"
+import { CardapioSemana } from "@/components/cardapio-semana"
 import { useTema } from "@/components/provedor-tema"
 import { cn } from "@/lib/utils"
 
@@ -152,6 +153,9 @@ export default function Home() {
 
       {/* Main Content - Envolve as seções principais */}
       <main id="main-content">
+        {/* Cardápio da Semana */}
+        <CardapioSemana />
+
         {/* Features Section - Fundo escuro e cards com fundo dinâmico */}
         <section className="py-24 bg-white dark:bg-gradient-to-br dark:from-[#0a1a33] dark:to-[#051224] relative" ref={servicesRef}>
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

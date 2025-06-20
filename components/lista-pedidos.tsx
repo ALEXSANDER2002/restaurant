@@ -24,6 +24,17 @@ export function ListaPedidos() {
   const [aviso, setAviso] = useState<string | null>(null)
   const [busca, setBusca] = useState("")
 
+  // Função auxiliar para formatar valor monetário de forma segura
+  const formatarValor = (valor: any): string => {
+    if (valor === null || valor === undefined) return "0,00"
+    
+    const numeroValor = typeof valor === 'string' ? parseFloat(valor) : valor
+    
+    if (isNaN(numeroValor)) return "0,00"
+    
+    return numeroValor.toFixed(2).replace('.', ',')
+  }
+
   useEffect(() => {
     const carregarPedidos = async () => {
       try {
@@ -218,7 +229,7 @@ export function ListaPedidos() {
                   <TableCell>{pedido.usuario_nome}</TableCell>
                   <TableCell>{format(parseISO(pedido.data), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                   <TableCell>{pedido.quantidade}</TableCell>
-                  <TableCell>R$ {pedido.valor_total.toFixed(2)}</TableCell>
+                  <TableCell>R$ {formatarValor(pedido.valor_total)}</TableCell>
                   <TableCell>{getStatusBadge(pedido.status)}</TableCell>
                   <TableCell>
                     {pedido.status === "pendente" && (

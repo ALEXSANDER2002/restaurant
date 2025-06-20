@@ -15,6 +15,13 @@
       "when": 1749855996354,
       "tag": "0001_yellow_naoko",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1750390381090,
+      "tag": "0002_workable_jackpot",
+      "breakpoints": true
     }
   ]
 }

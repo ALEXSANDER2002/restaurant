@@ -4,16 +4,17 @@ import postgres from 'postgres'
 import { eq } from 'drizzle-orm'
 import { cardapio } from '@/lib/drizzle/schema'
 
-const DATABASE_URL = process.env.DATABASE_URL
-if (!DATABASE_URL) {
-  throw new Error('DATABASE_URL não encontrada')
-}
-
-const client = postgres(DATABASE_URL)
-const db = drizzle(client)
-
 export async function POST() {
   try {
+    // Criar conexão apenas quando a API for chamada
+    const DATABASE_URL = process.env.DATABASE_URL
+    if (!DATABASE_URL) {
+      throw new Error('DATABASE_URL não encontrada')
+    }
+
+    const client = postgres(DATABASE_URL)
+    const db = drizzle(client)
+
     console.log('🌱 Iniciando seed do cardápio...')
 
     // Calcular início e fim da semana atual (segunda a sexta)
@@ -98,6 +99,9 @@ export async function POST() {
     console.log('✅ Cardápio da semana criado com sucesso!')
     console.log(`📅 Período: ${segundaFeira.toLocaleDateString('pt-BR')} a ${sextaFeira.toLocaleDateString('pt-BR')}`)
     console.log('🍽️ 5 dias de cardápio adicionados')
+
+    // Fechar conexão
+    await client.end()
 
     return NextResponse.json({
       sucesso: true,

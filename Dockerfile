@@ -45,9 +45,6 @@ RUN apk add --no-cache libc6-compat
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Instalar pnpm no container de produção
-RUN npm install -g pnpm
-
 # Copiar arquivos necessários para produção
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
@@ -58,9 +55,8 @@ COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 COPY --from=builder /app/lib ./lib
 
-# Copiar package.json e instalar apenas drizzle-kit e suas dependências
+# Copiar package.json para referências
 COPY --from=builder /app/package.json ./package.json
-RUN pnpm install drizzle-kit drizzle-orm postgres --prod
 
 # Copiar scripts de inicialização
 COPY --from=builder /app/scripts ./scripts

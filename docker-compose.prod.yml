@@ -69,10 +69,7 @@ services:
       sh -c "
         echo 'Aguardando banco de dados...' &&
         sleep 15 &&
-        echo 'Executando migrações...' &&
-        npx drizzle-kit push --config=drizzle.config.ts &&
-        echo 'Populando dados iniciais...' &&
-        echo 'Iniciando aplicação...' &&
+        echo 'Iniciando aplicação (migrações desabilitadas temporariamente)...' &&
         node server.js
       "
     healthcheck:

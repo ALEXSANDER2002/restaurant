@@ -58,10 +58,13 @@ COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 COPY --from=builder /app/lib ./lib
 
-# Copiar dependências necessárias do builder (incluindo drizzle-kit)
+# Copiar todas as dependências necessárias para drizzle-kit
 COPY --from=builder /app/node_modules/.bin/drizzle-kit ./node_modules/.bin/drizzle-kit
 COPY --from=builder /app/node_modules/drizzle-kit ./node_modules/drizzle-kit
 COPY --from=builder /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
+COPY --from=builder /app/node_modules/esbuild ./node_modules/esbuild
+COPY --from=builder /app/node_modules/postgres ./node_modules/postgres
+COPY --from=builder /app/node_modules/pg ./node_modules/pg
 
 # Copiar package.json para referências
 COPY --from=builder /app/package.json ./package.json

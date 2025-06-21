@@ -70,7 +70,7 @@ services:
         echo 'Aguardando banco de dados...' &&
         sleep 10 &&
         echo 'Executando migrações...' &&
-        npx drizzle-kit push &&
+        npx drizzle-kit push --config=drizzle.config.ts &&
         echo 'Iniciando aplicação...' &&
         node server.js
       "

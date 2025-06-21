@@ -205,7 +205,7 @@ docker-compose -f docker-compose.prod.yml exec postgres pg_dump -U postgres rest
 docker-compose -f docker-compose.prod.yml exec -T postgres psql -U postgres restaurant < backup_file.sql
 
 # Executar migrações manualmente
-docker-compose -f docker-compose.prod.yml exec app npx drizzle-kit push
+docker-compose -f docker-compose.prod.yml exec app npx drizzle-kit push --config=drizzle.config.ts
 ```
 
 ### Monitoramento

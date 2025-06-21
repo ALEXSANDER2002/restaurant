@@ -42,17 +42,25 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Instalar pnpm no container de produção
+RUN npm install -g pnpm
+
 # Copiar arquivos necessários para produção
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/migrations ./migrations
 
+# Copiar arquivos de configuração do Drizzle
+COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
+COPY --from=builder /app/lib ./lib
+
+# Copiar arquivos de dependências e instalar drizzle-kit
+COPY --from=builder /app/package.json ./package.json
+RUN pnpm add drizzle-kit --save-dev
+
 # Copiar scripts de inicialização
 COPY --from=builder /app/scripts ./scripts
-
-# Instalar pnpm no container de produção
-RUN npm install -g pnpm
 
 # Definir permissões
 USER nextjs

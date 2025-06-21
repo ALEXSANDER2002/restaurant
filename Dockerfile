@@ -58,16 +58,9 @@ COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 COPY --from=builder /app/lib ./lib
 
-# Copiar todas as dependências necessárias para drizzle-kit
-COPY --from=builder /app/node_modules/.bin/drizzle-kit ./node_modules/.bin/drizzle-kit
-COPY --from=builder /app/node_modules/drizzle-kit ./node_modules/drizzle-kit
-COPY --from=builder /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
-COPY --from=builder /app/node_modules/esbuild ./node_modules/esbuild
-COPY --from=builder /app/node_modules/postgres ./node_modules/postgres
-COPY --from=builder /app/node_modules/pg ./node_modules/pg
-
-# Copiar package.json para referências
+# Copiar package.json e instalar apenas drizzle-kit e suas dependências
 COPY --from=builder /app/package.json ./package.json
+RUN pnpm install drizzle-kit drizzle-orm postgres --prod
 
 # Copiar scripts de inicialização
 COPY --from=builder /app/scripts ./scripts

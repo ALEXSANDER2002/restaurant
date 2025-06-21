@@ -38,6 +38,9 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# Instalar dependências do sistema
+RUN apk add --no-cache libc6-compat
+
 # Criar usuário não-root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -55,9 +58,13 @@ COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 COPY --from=builder /app/lib ./lib
 
-# Copiar arquivos de dependências e instalar drizzle-kit
+# Copiar dependências necessárias do builder (incluindo drizzle-kit)
+COPY --from=builder /app/node_modules/.bin/drizzle-kit ./node_modules/.bin/drizzle-kit
+COPY --from=builder /app/node_modules/drizzle-kit ./node_modules/drizzle-kit
+COPY --from=builder /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
+
+# Copiar package.json para referências
 COPY --from=builder /app/package.json ./package.json
-RUN pnpm add drizzle-kit --save-dev
 
 # Copiar scripts de inicialização
 COPY --from=builder /app/scripts ./scripts

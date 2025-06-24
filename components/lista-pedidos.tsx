@@ -14,6 +14,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface PedidoExibicao extends Ticket {
   usuario_nome?: string
+  nome?: string
+  email?: string
+  campus?: string
+  utilizado?: boolean
+  data_utilizacao?: string
 }
 
 export function ListaPedidos() {
@@ -47,9 +52,9 @@ export function ListaPedidos() {
         }
 
         // Transformar os dados para o formato esperado
-        const pedidosFormatados = tickets.map((ticket) => ({
+        const pedidosFormatados = tickets.map((ticket: any) => ({
           ...ticket,
-          usuario_nome: ticket.usuario_id ?? "Usuário",
+          usuario_nome: ticket.nome ?? "Usuário",
         }))
 
         setPedidos(pedidosFormatados)
@@ -160,6 +165,21 @@ export function ListaPedidos() {
     }
   }
 
+  // Mapear campus para exibição
+  const getCampusInfo = (campus: string | undefined) => {
+    const campusMap = {
+      "1": { nome: "Campus 1", local: "Nova Marabá - Folha 31", cor: "bg-blue-50 text-blue-700 border-blue-200" },
+      "2": { nome: "Campus 2", local: "Nova Marabá - Folha 17", cor: "bg-green-50 text-green-700 border-green-200" },
+      "3": { nome: "Campus 3", local: "Cidade Jardim - Marabá", cor: "bg-purple-50 text-purple-700 border-purple-200" },
+    }
+    
+    return campusMap[campus as keyof typeof campusMap] || { 
+      nome: "Campus 1", 
+      local: "Nova Marabá - Folha 31", 
+      cor: "bg-gray-50 text-gray-700 border-gray-200" 
+    }
+  }
+
   if (carregando) {
     return (
       <div className="space-y-4">
@@ -216,47 +236,117 @@ export function ListaPedidos() {
                 <TableHead>ID</TableHead>
                 <TableHead>Usuário</TableHead>
                 <TableHead>Data</TableHead>
+                <TableHead>Campus</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Quantidade</TableHead>
                 <TableHead>Valor Total</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Utilização</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pedidosFiltrados.map((pedido) => (
-                <TableRow key={pedido.id}>
-                  <TableCell className="font-medium">{pedido.id}</TableCell>
-                  <TableCell>{pedido.usuario_nome}</TableCell>
-                  <TableCell>{format(parseISO(pedido.data), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
-                  <TableCell>{pedido.quantidade}</TableCell>
-                  <TableCell>R$ {formatarValor(pedido.valor_total)}</TableCell>
-                  <TableCell>{getStatusBadge(pedido.status)}</TableCell>
-                  <TableCell>
-                    {pedido.status === "pendente" && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 w-8 p-0 text-green-600"
-                          onClick={() => confirmarPedido(pedido.id)}
-                          aria-label="Confirmar pedido"
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 w-8 p-0 text-red-600"
-                          onClick={() => cancelarPedido(pedido.id)}
-                          aria-label="Cancelar pedido"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+              {pedidosFiltrados.map((pedido) => {
+                const campusInfo = getCampusInfo(pedido.campus)
+                return (
+                  <TableRow key={pedido.id}>
+                    <TableCell className="font-medium">
+                      <div className="max-w-[120px] truncate" title={pedido.id}>
+                        {pedido.id.substring(0, 8)}...
                       </div>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      <div className="max-w-[150px] truncate" title={pedido.usuario_nome}>
+                        {pedido.usuario_nome}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {format(parseISO(pedido.data), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {format(parseISO(pedido.data), "EEEE", { locale: ptBR })}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={campusInfo.cor}>
+                        <div className="flex flex-col items-center text-xs">
+                          <span className="font-medium">{campusInfo.nome}</span>
+                          <span className="text-[10px] opacity-75">{campusInfo.local}</span>
+                        </div>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        {pedido.subsidiado ? (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
+                            Subsidiado
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-xs">
+                            Não Subsidiado
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center font-medium">
+                      {pedido.quantidade}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      R$ {formatarValor(pedido.valor_total)}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(pedido.status)}</TableCell>
+                    <TableCell>
+                      {pedido.status === "pago" ? (
+                        pedido.utilizado ? (
+                          <div className="flex flex-col gap-1">
+                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-xs">
+                              ✅ Utilizado
+                            </Badge>
+                            {pedido.data_utilizacao && (
+                              <span className="text-xs text-muted-foreground">
+                                {format(parseISO(pedido.data_utilizacao), "dd/MM HH:mm", { locale: ptBR })}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
+                            🎫 Disponível
+                          </Badge>
+                        )
+                      ) : (
+                        <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200 text-xs">
+                          - - -
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {pedido.status === "pendente" && (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 p-0 text-green-600 hover:bg-green-50"
+                            onClick={() => confirmarPedido(pedido.id)}
+                            aria-label="Confirmar pedido"
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"
+                            onClick={() => cancelarPedido(pedido.id)}
+                            aria-label="Cancelar pedido"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </div>

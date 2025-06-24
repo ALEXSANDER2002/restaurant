@@ -15,8 +15,8 @@ O chatbot do Restaurante Universitário da UNIFESSPA foi completamente reformula
 ### 2. **Contexto Especializado UNIFESSPA**
 - 🏛️ **Campus Múltiplos**: Marabá, Santana do Araguaia, Rondon do Pará, Xinguara
 - 📍 **Localização Precisa**: Endereços completos de cada campus
-- 🕐 **Horários Atualizados**: 11h-14h (almoço) e 17h-19h30 (jantar)
-- 💰 **Preços Corretos**: Estudantes R$ 3,00, Professores/Funcionários R$ 10,00, Visitantes R$ 15,00
+- 🕐 **Horários Atualizados**: 11h-14h (apenas almoço, não servimos jantar)
+- 💰 **Preços Corretos**: Estudantes Subsidiados R$ 2,00, Não Subsidiados/Visitantes R$ 13,00
 
 ### 3. **Funcionalidades Melhoradas**
 - 🎯 Respostas contextuais baseadas no histórico da conversa

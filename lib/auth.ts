@@ -5,6 +5,7 @@ export interface AuthPayload {
   id: string
   email: string
   tipo_usuario: string
+  avatar_url?: string
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me"

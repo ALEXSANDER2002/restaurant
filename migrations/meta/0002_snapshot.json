@@ -1,10 +1,8 @@
 {
-  "id": "7ad5e5e6-300d-4226-b3a1-fc50a902092d",
-  "prevId": "7c9afe00-ad71-42c6-9ba1-f96bc466bb3e",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "cardapio": {
+    "public.cardapio": {
       "name": "cardapio",
       "schema": "",
       "columns": {
@@ -100,9 +98,12 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "perfis": {
+    "public.perfis": {
       "name": "perfis",
       "schema": "",
       "columns": {
@@ -161,18 +162,29 @@
       },
       "indexes": {
         "perfis_email_unique": {
-          "name": "perfis_email_unique",
           "columns": [
-            "email"
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "perfis_email_unique",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "tickets": {
+    "public.tickets": {
       "name": "tickets",
       "schema": "",
       "columns": {
@@ -260,26 +272,35 @@
         "tickets_usuario_id_perfis_id_fk": {
           "name": "tickets_usuario_id_perfis_id_fk",
           "tableFrom": "tickets",
-          "tableTo": "perfis",
           "columnsFrom": [
             "usuario_id"
           ],
+          "tableTo": "perfis",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "7ad5e5e6-300d-4226-b3a1-fc50a902092d",
+  "prevId": "7c9afe00-ad71-42c6-9ba1-f96bc466bb3e",
+  "sequences": {},
+  "policies": {},
+  "views": {},
+  "roles": {}
 }

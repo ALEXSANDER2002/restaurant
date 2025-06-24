@@ -13,6 +13,7 @@ const idiomas = [
   { valor: "pt-BR", rotulo: "idioma.ptBR" },
   { valor: "en-US", rotulo: "idioma.enUS" },
   { valor: "es", rotulo: "idioma.es" },
+  { valor: "fr", rotulo: "idioma.fr" },
 ]
 
 export function SeletorIdioma() {
@@ -20,7 +21,7 @@ export function SeletorIdioma() {
   const [aberto, setAberto] = useState(false)
 
   const handleAlterarIdioma = (novoIdioma: string) => {
-    alterarIdioma(novoIdioma as "pt-BR" | "en-US" | "es")
+    alterarIdioma(novoIdioma as "pt-BR" | "en-US" | "es" | "fr")
     setAberto(false)
   }
 

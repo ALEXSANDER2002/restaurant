@@ -4,8 +4,10 @@ import { createContext, useContext, useEffect, useState } from "react"
 
 interface Usuario {
   id: string
+  nome: string
   email: string
   tipo_usuario: string
+  avatar_url?: string
 }
 
 interface AuthContextValue {
@@ -13,6 +15,7 @@ interface AuthContextValue {
   carregando: boolean
   login: (email: string, senha: string) => Promise<Usuario | null>
   logout: () => Promise<void>
+  atualizarUsuario: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -21,13 +24,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [carregando, setCarregando] = useState(true)
 
+  const buscarDadosUsuario = async () => {
+    try {
+      const res = await fetch("/api/session")
+      const data = await res.json()
+      if (data.autenticado) {
+        setUsuario(data.usuario)
+      } else {
+        setUsuario(null)
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados do usuário:", error)
+      setUsuario(null)
+    }
+  }
+
   useEffect(() => {
-    fetch("/api/session")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.autenticado) setUsuario(data.usuario)
-      })
-      .finally(() => setCarregando(false))
+    buscarDadosUsuario().finally(() => setCarregando(false))
   }, [])
 
   async function login(email: string, senha: string) {
@@ -51,8 +64,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUsuario(null)
   }
 
+  async function atualizarUsuario() {
+    await buscarDadosUsuario()
+  }
+
   return (
-    <AuthContext.Provider value={{ usuario, carregando, login, logout }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ usuario, carregando, login, logout, atualizarUsuario }}>
+      {children}
+    </AuthContext.Provider>
   )
 }
 

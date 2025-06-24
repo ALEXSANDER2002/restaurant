@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Avatar } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { getResponseByKeywords } from "@/lib/chat-responses"
+import { useIdioma } from "@/contexts/idioma-context"
 
 type Message = {
   id: string
@@ -17,10 +18,25 @@ type Message = {
 }
 
 export function ChatBot() {
+  const { idioma, t } = useIdioma()
+  
+  const getInitialMessage = () => {
+    switch (idioma) {
+      case 'en-US':
+        return "Hello! I'm the virtual assistant for UNIFESSPA's University Restaurant! 🍽️ I can help with information about schedules, menu, prices, location and much more. How can I help you today?"
+      case 'es':
+        return "¡Hola! ¡Soy el asistente virtual del Restaurante Universitario de UNIFESSPA! 🍽️ Puedo ayudar con información sobre horarios, menú, precios, ubicación y mucho más. ¿Cómo puedo ayudarte hoy?"
+      case 'fr':
+        return "Bonjour ! Je suis l'assistant virtuel du Restaurant Universitaire de l'UNIFESSPA ! 🍽️ Je peux vous aider avec des informations sur les horaires, le menu, les prix, l'emplacement et bien plus encore. Comment puis-je vous aider aujourd'hui ?"
+      default:
+        return "Olá! Sou o assistente virtual do Restaurante Universitário da UNIFESSPA! 🍽️ Posso ajudar com informações sobre horários, cardápio, preços, localização e muito mais. Como posso ajudar você hoje?"
+    }
+  }
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Olá! Sou o assistente virtual do Restaurante Universitário da UNIFESSPA! 🍽️ Posso ajudar com informações sobre horários, cardápio, preços, localização e muito mais. Como posso ajudar você hoje?",
+      content: getInitialMessage(),
       role: "assistant",
     },
   ])
@@ -55,6 +71,17 @@ export function ChatBot() {
     }
   }, [isChatOpen, isMinimized])
 
+  // Update initial message when language changes
+  useEffect(() => {
+    setMessages([
+      {
+        id: "1",
+        content: getInitialMessage(),
+        role: "assistant",
+      },
+    ])
+  }, [idioma])
+
   // Cleanup intervals on unmount
   useEffect(() => {
     return () => {
@@ -63,15 +90,43 @@ export function ChatBot() {
     }
   }, [])
 
+  const getLoadingPhrases = () => {
+    switch (idioma) {
+      case 'en-US':
+        return [
+          "Analyzing your question...",
+          "Searching for information...",
+          "Preparing response...",
+          "Almost ready...",
+        ]
+      case 'es':
+        return [
+          "Analizando su pregunta...",
+          "Buscando información...",
+          "Preparando respuesta...",
+          "Casi listo...",
+        ]
+      case 'fr':
+        return [
+          "Analyse de votre question...",
+          "Recherche d'informations...",
+          "Préparation de la réponse...",
+          "Presque prêt...",
+        ]
+      default:
+        return [
+          "Analisando sua pergunta...",
+          "Buscando informações...",
+          "Preparando resposta...",
+          "Quase pronto...",
+        ]
+    }
+  }
+
   // Simulate typing effect for loading text
   const simulateTyping = (text: string) => {
     let currentIndex = 0
-    const phrases = [
-      "Analisando sua pergunta...",
-      "Buscando informações...",
-      "Preparando resposta...",
-      "Quase pronto...",
-    ]
+    const phrases = getLoadingPhrases()
 
     setLoadingText("")
 
@@ -101,7 +156,7 @@ export function ChatBot() {
     setInput("")
     setIsLoading(true)
     setLoadingProgress(0)
-    simulateTyping("Analisando sua pergunta...")
+    simulateTyping("")
 
     // Simulate progress
     if (progressInterval.current) clearInterval(progressInterval.current)
@@ -123,7 +178,8 @@ export function ChatBot() {
         },
         body: JSON.stringify({
           message: input,
-          messages: messages.concat([userMessage])
+          messages: messages.concat([userMessage]),
+          language: idioma
         }),
       });
 
@@ -140,7 +196,7 @@ export function ChatBot() {
         const assistantMessageId = (Date.now() + 1).toString()
         const assistantMessage: Message = {
           id: assistantMessageId,
-          content: data.response || 'Desculpe, não consegui processar sua mensagem.',
+          content: data.response || t("chatbot.erro"),
           role: "assistant",
           isNew: true,
         }
@@ -374,7 +430,7 @@ export function ChatBot() {
                       alt="SIRUS Logo" 
                     />
                   </Avatar>
-                  <CardTitle className="text-lg">Assistente do RU</CardTitle>
+                  <CardTitle className="text-lg">{t("chatbot.titulo")}</CardTitle>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -436,7 +492,7 @@ export function ChatBot() {
                           type="text"
                           value={input}
                           onChange={(e) => setInput(e.target.value)}
-                          placeholder="Digite sua mensagem..."
+                          placeholder={t("chatbot.placeholder")}
                           className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                         />
                         <button

@@ -27,7 +27,6 @@ export async function GET(req: NextRequest) {
         acompanhamentos: cardapio.acompanhamentos,
         saladas: cardapio.saladas,
         sobremesa: cardapio.sobremesa,
-        bebida: cardapio.bebida,
         opcao_vegetariana: cardapio.opcao_vegetariana,
         observacoes: cardapio.observacoes,
       })

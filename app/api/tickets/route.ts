@@ -19,6 +19,9 @@ export async function GET(req: NextRequest) {
         status: tickets.status,
         created_at: tickets.created_at,
         subsidiado: tickets.subsidiado,
+        utilizado: tickets.utilizado,
+        data_utilizacao: tickets.data_utilizacao,
+        campus: tickets.campus,
         nome: perfis.nome,
         email: perfis.email,
       })
@@ -51,7 +54,14 @@ export async function POST(req: NextRequest) {
       valor_total: String(body.valor_total),
       status: body.status ?? "pendente",
       created_at: new Date(),
+      updated_at: new Date(),
       subsidiado: body.subsidiado ?? false,
+      utilizado: false,
+      data_utilizacao: null,
+      campus: body.campus ?? "1",
+      qr_code: body.qr_code ?? `TICKET_${crypto.randomUUID()}_${Date.now()}`,
+      utilizado_por: null,
+      external_payment_id: body.external_payment_id ?? null,
     }
 
     const [ticket] = await db.insert(tickets).values(novoTicket).returning()

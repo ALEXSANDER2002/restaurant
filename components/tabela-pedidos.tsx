@@ -128,7 +128,7 @@ export function TabelaPedidos({
               <TableRow key={pedido.id}>
                 <TableCell className="font-medium">{pedido.id}</TableCell>
                 <TableCell>{pedido.usuario_nome}</TableCell>
-                <TableCell>{format(parseISO(pedido.data), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
+                <TableCell>{format(parseISO(pedido.data), "dd/MM/yyyy HH:mm", { locale: ptBR })}</TableCell>
                 <TableCell>{pedido.quantidade}</TableCell>
                 <TableCell>R$ {formatarValor(pedido.valor_total)}</TableCell>
                 <TableCell>

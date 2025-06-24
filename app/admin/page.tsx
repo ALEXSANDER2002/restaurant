@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DashboardVendas } from "@/components/dashboard-vendas"
 import { ListaPedidos } from "@/components/lista-pedidos"
+import { ValidadorQRIntegrado } from "@/components/validador-qr-integrado"
 import { ProtecaoRota } from "@/components/protecao-rota"
 import { Button } from "@/components/ui/button"
 import { Database } from "lucide-react"
@@ -29,6 +30,9 @@ export default function PaginaAdmin() {
               <TabsTrigger value="pedidos" className="flex-1 min-w-[100px]">
                 Pedidos
               </TabsTrigger>
+              <TabsTrigger value="validar-qr" className="flex-1 min-w-[120px]">
+                Validar QR
+              </TabsTrigger>
               { /* <TabsTrigger value="usuarios" className="flex-1 min-w-[100px]">Usuários</TabsTrigger> */ }
             </TabsList>
 
@@ -54,6 +58,18 @@ export default function PaginaAdmin() {
                 </CardHeader>
                 <CardContent>
                   <ListaPedidos />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="validar-qr">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Validação de Tickets</CardTitle>
+                  <CardDescription>Escaneie QR codes para validar e debitar tickets</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ValidadorQRIntegrado />
                 </CardContent>
               </Card>
             </TabsContent>

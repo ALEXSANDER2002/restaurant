@@ -163,7 +163,7 @@ export default function DatabaseAdmin() {
                 <p>• 30% dos tickets serão não subsidiados (R$ 13,00)</p>
                 <p>• 90% dos tickets estarão pagos, 8% pendentes, 2% cancelados</p>
                 <p>• Mais tickets durante dias úteis, menos nos finais de semana</p>
-                <p>• Horários concentrados entre 11h e 15h (horário de almoço)</p>
+                <p>• Horários concentrados entre 11h e 14h (horário de almoço)</p>
               </div>
             </CardContent>
           </Card>

@@ -25,6 +25,27 @@ const nextConfig = {
   output: 'standalone', // Necessário para Docker
   webpack: (config) => {
     config.output.hashFunction = "xxhash64"
+    
+    // Configurações para Face-API.js
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      os: false,
+      crypto: false,
+      stream: false,
+      buffer: false,
+      util: false,
+      encoding: false,
+    }
+    
+    // Ignorar warnings específicos do Face-API.js
+    config.ignoreWarnings = [
+      { module: /node_modules\/face-api\.js/ },
+      { module: /node_modules\/@tensorflow/ },
+      { module: /node_modules\/node-fetch/ },
+    ]
+    
     return config
   },
 }

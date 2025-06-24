@@ -10,12 +10,12 @@ const responseDatabase: ResponseData[] = [
   {
     keywords: ["horário", "horarios", "hora", "abre", "fecha", "funcionamento", "expediente"],
     response:
-      "O Restaurante Universitário da UNIFESSPA funciona de segunda a sexta-feira:\n\n🕐 **Horários:**\n• Almoço: 11h00 às 14h00\n• Jantar: 17h00 às 19h30\n\n❌ Fechado aos finais de semana e feriados.\n\n📍 Localizado no Campus de Marabá - Folha 31, Quadra 07, Lote Especial, Nova Marabá.",
+      "O Restaurante Universitário da UNIFESSPA funciona de segunda a sexta-feira:\n\n🕐 **Horário:**\n• Almoço: 11h00 às 14h00\n\n❌ Não servimos jantar\n❌ Fechado aos finais de semana e feriados.\n\n📍 Localizado no Campus de Marabá - Folha 31, Quadra 07, Lote Especial, Nova Marabá.",
   },
   {
     keywords: ["preço", "precos", "valor", "custo", "quanto custa", "pagar"],
     response:
-      "💰 **Preços das refeições no RU da UNIFESSPA:**\n\n• 🎓 Estudantes: R$ 3,00\n• 👨‍🏫 Professores: R$ 10,00\n• 👷‍♂️ Funcionários: R$ 10,00\n• 👥 Visitantes: R$ 15,00\n\n💡 **Dica:** Estudantes em vulnerabilidade social podem solicitar auxílio alimentação junto à PRAE para refeições gratuitas ou com desconto!",
+      "💰 **Preços das refeições no RU da UNIFESSPA:**\n\n• 🎓 Estudantes Subsidiados: R$ 2,00 (com cota por escola, cor, renda)\n• 👥 Não Subsidiados/Visitantes: R$ 13,00\n\n💡 **Dica:** Estudantes em vulnerabilidade social podem solicitar auxílio alimentação junto à PRAE para refeições gratuitas ou com desconto!",
   },
   {
     keywords: [
@@ -51,7 +51,7 @@ const responseDatabase: ResponseData[] = [
   {
     keywords: ["fila", "filas", "lotado", "cheio", "espera", "demora"],
     response:
-      "As filas costumam ser maiores entre 12h e 13h no almoço, e entre 18h e 19h no jantar. Para evitar filas, recomendamos chegar um pouco antes da abertura ou após os horários de pico.",
+      "As filas costumam ser maiores entre 12h e 13h. Para evitar filas, recomendamos chegar logo após a abertura (11h) ou próximo ao final do horário (13h30).",
   },
   {
     keywords: ["crédito", "credito", "recarga", "carregar", "cartão", "cartao"],
@@ -107,7 +107,7 @@ const responseDatabase: ResponseData[] = [
   {
     keywords: ["café", "cafe", "café da manhã", "cafe da manha", "desjejum", "breakfast"],
     response:
-      "Atualmente, o RU não oferece café da manhã, apenas almoço e jantar. Há algumas lanchonetes no campus que servem café da manhã a partir das 7h.",
+      "Atualmente, o RU oferece apenas almoço, não temos café da manhã nem jantar. Há algumas lanchonetes no campus para outras refeições.",
   },
 ]
 

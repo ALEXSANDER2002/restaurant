@@ -1,10 +1,8 @@
 {
-  "id": "5ca19495-96f1-4682-8054-44e9d28acb82",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "perfis": {
+    "public.perfis": {
       "name": "perfis",
       "schema": "",
       "columns": {
@@ -64,9 +62,12 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "tickets": {
+    "public.tickets": {
       "name": "tickets",
       "schema": "",
       "columns": {
@@ -148,26 +149,35 @@
         "tickets_usuario_id_perfis_id_fk": {
           "name": "tickets_usuario_id_perfis_id_fk",
           "tableFrom": "tickets",
-          "tableTo": "perfis",
           "columnsFrom": [
             "usuario_id"
           ],
+          "tableTo": "perfis",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "5ca19495-96f1-4682-8054-44e9d28acb82",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "sequences": {},
+  "policies": {},
+  "views": {},
+  "roles": {}
 }

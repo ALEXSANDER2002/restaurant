@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BotaoEntrar } from "./botao-entrar"
 import { useIdioma } from "@/contexts/idioma-context"
 import { LogOut, User, Menu, X, Utensils } from "lucide-react"
@@ -21,6 +22,10 @@ export function Cabecalho() {
   const scrollDir = useScrollDirection(8)
 
   const toggleMenu = () => setMenuAberto(!menuAberto)
+
+  const getInitials = (email: string) => {
+    return email.charAt(0).toUpperCase()
+  }
 
   return (
     <motion.header
@@ -63,18 +68,24 @@ export function Cabecalho() {
                 <Button
                   asChild
                   variant="ghost"
-                  className="hover:bg-white/10 transition-colors"
+                  className={cn(
+                    "hover:bg-white/10 transition-colors",
+                    pathname === "/cardapio" && "bg-white/10 font-medium",
+                  )}
                 >
-                  <Link href="#cardapio">{t("nav.cardapio")}</Link>
+                  <Link href="/cardapio">{t("nav.cardapio")}</Link>
                   </Button>
               </li>
               <li>
                 <Button
                   asChild
                   variant="ghost"
-                  className="hover:bg-white/10 transition-colors"
+                  className={cn(
+                    "hover:bg-white/10 transition-colors",
+                    pathname === "/sobre" && "bg-white/10 font-medium",
+                  )}
                 >
-                  <Link href="#sobre">{t("nav.sobre")}</Link>
+                  <Link href="/sobre">{t("nav.sobre")}</Link>
                   </Button>
               </li>
               {usuario ? (
@@ -84,12 +95,23 @@ export function Cabecalho() {
                       <Button
                         variant="ghost"
                         className={cn(
-                          "hover:bg-primary/10 transition-colors",
-                          pathname === "/usuario" && "bg-primary/10 font-medium",
+                          "hover:bg-white/10 transition-colors flex items-center gap-2",
+                          pathname === "/usuario" && "bg-white/10 font-medium",
                         )}
                       >
-                        <User className="mr-2 h-4 w-4" />
-                        {usuario.tipo_usuario === "admin" ? "Admin" : usuario.email.split("@")[0]}
+                        <Avatar className="h-8 w-8 border-2 border-white/30 shadow-lg">
+                          <AvatarImage 
+                            src={usuario.avatar_url || undefined} 
+                            alt={`Foto de perfil de ${usuario.email}`}
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="bg-white/30 text-white text-sm font-medium">
+                            {getInitials(usuario.email)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="hidden sm:inline">
+                          {usuario.tipo_usuario === "admin" ? "Admin" : usuario.email.split("@")[0]}
+                        </span>
                       </Button>
                     </Link>
                   </li>
@@ -138,18 +160,24 @@ export function Cabecalho() {
                 <Button
                   asChild
                   variant="ghost"
-                  className="w-full justify-start hover:bg-white/10"
+                  className={cn(
+                    "w-full justify-start hover:bg-white/10",
+                    pathname === "/cardapio" && "bg-white/10 font-medium",
+                  )}
                 >
-                  <Link href="#cardapio" onClick={() => setMenuAberto(false)}>{t("nav.cardapio")}</Link>
+                  <Link href="/cardapio" onClick={() => setMenuAberto(false)}>{t("nav.cardapio")}</Link>
                   </Button>
               </li>
               <li>
                 <Button
                   asChild
                   variant="ghost"
-                  className="w-full justify-start hover:bg-white/10"
+                  className={cn(
+                    "w-full justify-start hover:bg-white/10",
+                    pathname === "/sobre" && "bg-white/10 font-medium",
+                  )}
                 >
-                  <Link href="#sobre" onClick={() => setMenuAberto(false)}>{t("nav.sobre")}</Link>
+                  <Link href="/sobre" onClick={() => setMenuAberto(false)}>{t("nav.sobre")}</Link>
                   </Button>
               </li>
               {usuario ? (
@@ -159,11 +187,21 @@ export function Cabecalho() {
                       <Button
                         variant="ghost"
                         className={cn(
-                          "w-full justify-start hover:bg-primary/10",
-                          pathname === "/usuario" && "bg-primary/10 font-medium",
+                          "w-full justify-start hover:bg-white/10 flex items-center gap-2",
+                          pathname === "/usuario" && "bg-white/10 font-medium",
                         )}
+                        onClick={() => setMenuAberto(false)}
                       >
-                        <User className="mr-2 h-4 w-4" />
+                        <Avatar className="h-8 w-8 border-2 border-white/30 shadow-lg">
+                          <AvatarImage 
+                            src={usuario.avatar_url || undefined} 
+                            alt={`Foto de perfil de ${usuario.email}`}
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="bg-white/30 text-white text-sm font-medium">
+                            {getInitials(usuario.email)}
+                          </AvatarFallback>
+                        </Avatar>
                         {usuario.tipo_usuario === "admin" ? "Admin" : usuario.email.split("@")[0]}
                       </Button>
                     </Link>

@@ -28,7 +28,7 @@ export function DemoChatUNIFESSPA() {
     {
       icon: <Clock className="h-5 w-5" />,
       title: "Horários Atualizados",
-      description: "Funcionamento: Segunda a sexta, 11h-14h (almoço) e 17h-19h30 (jantar)"
+      description: "Funcionamento: Segunda a sexta, 11h-14h (apenas almoço)"
     },
   ]
 
@@ -85,22 +85,15 @@ export function DemoChatUNIFESSPA() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">R$ 3,00</div>
-              <div className="text-sm text-gray-600">Estudantes</div>
+              <div className="text-2xl font-bold text-blue-600">R$ 2,00</div>
+              <div className="text-sm text-gray-600">Estudantes Subsidiados</div>
+              <div className="text-xs text-gray-500">(com cota por escola, cor, renda)</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">R$ 10,00</div>
-              <div className="text-sm text-gray-600">Professores</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">R$ 10,00</div>
-              <div className="text-sm text-gray-600">Funcionários</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">R$ 15,00</div>
-              <div className="text-sm text-gray-600">Visitantes</div>
+              <div className="text-2xl font-bold text-blue-600">R$ 13,00</div>
+              <div className="text-sm text-gray-600">Não Subsidiados/Visitantes</div>
             </div>
           </div>
         </CardContent>

@@ -8,27 +8,45 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl
     const periodo = searchParams.get("periodo") || "hoje"
+    const dataEspecifica = searchParams.get("data") // Nova opção para data específica
     
     const agora = new Date()
     let dataInicio: Date
     let dataFim: Date
     
-    switch (periodo) {
-      case "hoje":
-        dataInicio = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
-        dataFim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1)
-        break
-      case "semana":
-        dataInicio = new Date(agora.getTime() - 7 * 24 * 60 * 60 * 1000)
-        dataFim = agora
-        break
-      case "mes":
-        dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1)
-        dataFim = new Date(agora.getFullYear(), agora.getMonth() + 1, 1)
-        break
-      default:
-        dataInicio = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
-        dataFim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1)
+    // Se foi fornecida uma data específica, usar ela
+    if (dataEspecifica) {
+      const dataParseada = new Date(dataEspecifica)
+      dataInicio = new Date(dataParseada.getFullYear(), dataParseada.getMonth(), dataParseada.getDate())
+      dataFim = new Date(dataParseada.getFullYear(), dataParseada.getMonth(), dataParseada.getDate() + 1)
+    } else {
+      // Usar os períodos pré-definidos
+      switch (periodo) {
+        case "hoje":
+          dataInicio = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+          dataFim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1)
+          break
+        case "semana":
+          dataInicio = new Date(agora.getTime() - 7 * 24 * 60 * 60 * 1000)
+          dataFim = agora
+          break
+        case "mes":
+          dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1)
+          dataFim = new Date(agora.getFullYear(), agora.getMonth() + 1, 1)
+          break
+        case "trimestre":
+          const trimestreAtual = Math.floor(agora.getMonth() / 3)
+          dataInicio = new Date(agora.getFullYear(), trimestreAtual * 3, 1)
+          dataFim = new Date(agora.getFullYear(), (trimestreAtual + 1) * 3, 1)
+          break
+        case "ano":
+          dataInicio = new Date(agora.getFullYear(), 0, 1)
+          dataFim = new Date(agora.getFullYear() + 1, 0, 1)
+          break
+        default:
+          dataInicio = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+          dataFim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1)
+      }
     }
     
     // Buscar todos os tickets do período
@@ -44,6 +62,7 @@ export async function GET(req: NextRequest) {
         subsidiado: tickets.subsidiado,
         nome: perfis.nome,
         email: perfis.email,
+        campus: tickets.campus,
       })
       .from(tickets)
       .leftJoin(perfis, eq(perfis.id, tickets.usuario_id))
@@ -55,11 +74,12 @@ export async function GET(req: NextRequest) {
       )
       .orderBy(desc(tickets.created_at))
     
-    // Calcular estatísticas básicas
-    const totalVendas = ticketsPeriodo.length
-    const valorTotal = ticketsPeriodo.reduce((acc, ticket) => acc + parseFloat(ticket.valor_total), 0)
-    const ticketsSubsidiados = ticketsPeriodo.filter(t => t.subsidiado).length
-    const ticketsNaoSubsidiados = ticketsPeriodo.filter(t => !t.subsidiado).length
+    // Calcular estatísticas básicas (apenas tickets pagos)
+    const ticketsPagos = ticketsPeriodo.filter(t => t.status === "pago")
+    const totalVendas = ticketsPagos.length
+    const valorTotal = ticketsPagos.reduce((acc, ticket) => acc + parseFloat(ticket.valor_total), 0)
+    const ticketsSubsidiados = ticketsPagos.filter(t => t.subsidiado).length
+    const ticketsNaoSubsidiados = ticketsPagos.filter(t => !t.subsidiado).length
     
     // Estatísticas por status
     const statusStats = {
@@ -80,6 +100,44 @@ export async function GET(req: NextRequest) {
       .map(([nome, quantidade]) => ({ nome, quantidade }))
       .sort((a, b) => b.quantidade - a.quantidade)
       .slice(0, 5)
+    
+    // Estatísticas por campus
+    const campusStats = {
+      "1": {
+        nome: "Campus 1",
+        local: "Nova Marabá - Folha 31",
+        tickets: ticketsPagos.filter(t => t.campus === "1").length,
+        valor: ticketsPagos.filter(t => t.campus === "1").reduce((acc, ticket) => acc + parseFloat(ticket.valor_total), 0),
+        subsidiados: ticketsPagos.filter(t => t.campus === "1" && t.subsidiado).length,
+        naoSubsidiados: ticketsPagos.filter(t => t.campus === "1" && !t.subsidiado).length,
+      },
+      "2": {
+        nome: "Campus 2", 
+        local: "Nova Marabá - Folha 17",
+        tickets: ticketsPagos.filter(t => t.campus === "2").length,
+        valor: ticketsPagos.filter(t => t.campus === "2").reduce((acc, ticket) => acc + parseFloat(ticket.valor_total), 0),
+        subsidiados: ticketsPagos.filter(t => t.campus === "2" && t.subsidiado).length,
+        naoSubsidiados: ticketsPagos.filter(t => t.campus === "2" && !t.subsidiado).length,
+      },
+      "3": {
+        nome: "Campus 3",
+        local: "Cidade Jardim - Marabá", 
+        tickets: ticketsPagos.filter(t => t.campus === "3").length,
+        valor: ticketsPagos.filter(t => t.campus === "3").reduce((acc, ticket) => acc + parseFloat(ticket.valor_total), 0),
+        subsidiados: ticketsPagos.filter(t => t.campus === "3" && t.subsidiado).length,
+        naoSubsidiados: ticketsPagos.filter(t => t.campus === "3" && !t.subsidiado).length,
+      }
+    }
+
+    // Dados por campus formatados para gráficos
+    const dadosPorCampus = Object.entries(campusStats).map(([id, stats]) => ({
+      campus: stats.nome,
+      local: stats.local,
+      tickets: stats.tickets,
+      valor: stats.valor,
+      subsidiados: stats.subsidiados,
+      naoSubsidiados: stats.naoSubsidiados,
+    }))
     
     // Dados por hora (para hoje)
     const dadosPorHora = Array.from({ length: 24 }, (_, hora) => {
@@ -117,7 +175,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       sucesso: true,
       data: {
-        periodo,
+        periodo: dataEspecifica ? `Data: ${dataEspecifica}` : periodo,
         totalVendas,
         valorTotal,
         ticketsSubsidiados,
@@ -126,7 +184,11 @@ export async function GET(req: NextRequest) {
         topUsuarios,
         dadosPorHora,
         dadosPorDia,
+        dadosPorCampus,
         tickets: ticketsPeriodo,
+        dataInicio: dataInicio.toISOString(),
+        dataFim: dataFim.toISOString(),
+        filtroAplicado: dataEspecifica ? 'data' : 'periodo'
       }
     })
   } catch (error: any) {

@@ -15,15 +15,13 @@ INFORMAÇÕES IMPORTANTES SOBRE O RU DA UNIFESSPA:
 - Campus de Xinguara: Rua Coronel Fontoura, 515 - Centro
 
 **Horários de Funcionamento:**
-- Almoço: 11h00 às 14h00
-- Jantar: 17h00 às 19h30
+- Almoço: 11h00 às 14h00 (apenas almoço, não servimos jantar)
 - Funcionamento: Segunda a sexta-feira
 - Fechado aos finais de semana e feriados
 
-**Preços (valores aproximados):**
-- Estudantes: R$ 3,00 por refeição
-- Professores e funcionários: R$ 10,00 por refeição
-- Visitantes: R$ 15,00 por refeição
+**Preços:**
+- Estudantes Subsidiados: R$ 2,00 por refeição (com cota por escola, cor, renda)
+- Não Subsidiados/Visitantes: R$ 13,00 por refeição
 
 **Cardápio Típico:**
 - Arroz e feijão (sempre disponível)
@@ -72,10 +70,24 @@ export class GeminiChatService {
     this.model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   }
 
-  async generateResponse(userMessage: string): Promise<string> {
+  private getLanguageInstruction(language: string): string {
+    switch (language) {
+      case 'en-US':
+        return 'Always respond in English.';
+      case 'es':
+        return 'Siempre responde en español.';
+      case 'fr':
+        return 'Répondez toujours en français.';
+      default:
+        return 'Responda sempre em português brasileiro.';
+    }
+  }
+
+  async generateResponse(userMessage: string, language: string = 'pt-BR'): Promise<string> {
     try {
       console.log('🤖 Gerando resposta com Gemini para:', userMessage);
-      const prompt = `${CONTEXT}\n\nPergunta do usuário: ${userMessage}\n\nResposta:`;
+      const languageInstruction = this.getLanguageInstruction(language);
+      const prompt = `${CONTEXT}\n\n${languageInstruction}\n\nPergunta do usuário: ${userMessage}\n\nResposta:`;
       
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
@@ -89,12 +101,13 @@ export class GeminiChatService {
     }
   }
 
-  async generateResponseWithHistory(messages: Array<{role: string, content: string}>): Promise<string> {
+  async generateResponseWithHistory(messages: Array<{role: string, content: string}>, language: string = 'pt-BR'): Promise<string> {
     try {
       console.log('🧠 Gerando resposta com histórico, mensagens:', messages.length);
       
       // Construir o histórico da conversa
-      let conversationHistory = `${CONTEXT}\n\nHistórico da conversa:\n`;
+      const languageInstruction = this.getLanguageInstruction(language);
+      let conversationHistory = `${CONTEXT}\n\n${languageInstruction}\n\nHistórico da conversa:\n`;
       
       messages.forEach((msg, index) => {
         if (index === 0) return; // Pular mensagem inicial do sistema

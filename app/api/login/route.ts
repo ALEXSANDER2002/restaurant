@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
     const token = gerarToken({ id: usuario[0].id, email: usuario[0].email, tipo_usuario: usuario[0].tipo_usuario ?? "usuario" })
 
-    const res = NextResponse.json({ ok: true, usuario: { id: usuario[0].id, email: usuario[0].email, tipo_usuario: usuario[0].tipo_usuario } })
+    const res = NextResponse.json({ ok: true, usuario: { id: usuario[0].id, nome: usuario[0].nome, email: usuario[0].email, tipo_usuario: usuario[0].tipo_usuario } })
     res.cookies.set({
       name: "token",
       value: token,

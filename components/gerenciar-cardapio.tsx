@@ -31,7 +31,6 @@ interface CardapioItem {
   acompanhamentos: string
   saladas: string
   sobremesa: string
-  bebida: string
   opcao_vegetariana: string
   observacoes?: string
 }
@@ -54,7 +53,6 @@ const TEMPLATE_CARDAPIO: CardapioItem = {
   acompanhamentos: 'Arroz, Feijão',
   saladas: '',
   sobremesa: '',
-  bebida: 'Suco Natural',
   opcao_vegetariana: '',
   observacoes: '',
 }
@@ -372,18 +370,7 @@ export function GerenciarCardapio() {
                     />
                   </div>
 
-                  {/* Bebida */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <Coffee className="h-4 w-4 text-blue-600" />
-                      Bebida
-                    </Label>
-                    <Input
-                      placeholder="Ex: Suco de laranja natural"
-                      value={cardapio[dia.key]?.bebida || ''}
-                      onChange={(e) => atualizarCardapio(dia.key, 'bebida', e.target.value)}
-                    />
-                  </div>
+
 
                   {/* Opção Vegetariana */}
                   <div className="space-y-2">

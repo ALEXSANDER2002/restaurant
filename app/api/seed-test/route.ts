@@ -56,13 +56,13 @@ export async function POST() {
       const variacao = Math.floor(Math.random() * 40) - 20
       const totalTicketsHoje = Math.max(5, baseTickets + variacao)
       
-      // Distribuir tickets ao longo do dia (horários de almoço: 11h-15h)
+              // Distribuir tickets ao longo do dia (horários de almoço: 11h-14h)
       for (let j = 0; j < totalTicketsHoje; j++) {
         const usuario = usuariosInseridos[Math.floor(Math.random() * usuariosInseridos.length)]
         if (!usuario || usuario.tipo === "admin") continue
         
-        // Horário aleatório entre 11h e 15h
-        const hora = 11 + Math.floor(Math.random() * 4)
+                            // Horário aleatório entre 11h e 14h
+          const hora = 11 + Math.floor(Math.random() * 3)
         const minuto = Math.floor(Math.random() * 60)
         
         const dataTicket = new Date(data)

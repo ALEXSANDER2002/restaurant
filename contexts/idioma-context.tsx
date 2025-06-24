@@ -4,7 +4,7 @@ import type React from "react"
 
 import { createContext, useContext, useEffect, useState } from "react"
 
-type Idioma = "pt-BR" | "en-US" | "es"
+type Idioma = "pt-BR" | "en-US" | "es" | "fr"
 
 interface ContextoIdioma {
   idioma: Idioma
@@ -59,6 +59,13 @@ const traducoes: Record<Idioma, Record<string, string>> = {
     "login.qrcode.instrucao": "Posicione o QR Code no centro da câmera para escanear",
     "login.qrcode.iniciar": "Iniciar Escaneamento",
     "login.qrcode.parar": "Parar Escaneamento",
+    "login.facial": "Facial",
+    "login.facial.titulo": "Login Facial",
+    "login.facial.instrucao": "Posicione seu rosto na câmera para reconhecimento",
+    "login.facial.carregando": "Carregando modelos...",
+    "login.facial.ativar": "Ativar Câmera",
+    "login.facial.reconhecer": "Reconhecer",
+    "login.facial.escaneando": "Escaneando...",
 
     // Painel do Estudante
     "estudante.titulo": "Painel do Estudante",
@@ -185,6 +192,7 @@ const traducoes: Record<Idioma, Record<string, string>> = {
     "idioma.ptBR": "Português (Brasil)",
     "idioma.enUS": "English (US)",
     "idioma.es": "Español",
+    "idioma.fr": "Français",
     "idioma.selecionar": "Selecionar idioma",
     "idioma.buscar": "Buscar idioma...",
     "idioma.naoEncontrado": "Nenhum idioma encontrado.",
@@ -224,7 +232,13 @@ const traducoes: Record<Idioma, Record<string, string>> = {
       "Oferecemos diversos serviços para atender às necessidades da comunidade acadêmica. Clique em cada card para saber mais.",
     "home.ajuda.horario.titulo": "Horário de Funcionamento",
     "home.ajuda.horario.descricao":
-      "O Restaurante Universitário funciona de segunda a sexta-feira, das 11:00 às 14:00, para o almoço.",
+      "O Restaurante Universitário funciona de segunda a sexta-feira, das 11:00 às 14:00, apenas para o almoço. Não servimos jantar.",
+
+    // Chatbot
+    "chatbot.titulo": "Assistente do RU",
+    "chatbot.placeholder": "Digite sua mensagem...",
+    "chatbot.enviar": "Enviar",
+    "chatbot.erro": "Desculpe, não consegui processar sua mensagem.",
   },
   "en-US": {
     // General
@@ -269,6 +283,13 @@ const traducoes: Record<Idioma, Record<string, string>> = {
     "login.qrcode.instrucao": "Position the QR Code in the center of the camera to scan",
     "login.qrcode.iniciar": "Start Scanning",
     "login.qrcode.parar": "Stop Scanning",
+    "login.facial": "Facial",
+    "login.facial.titulo": "Facial Login",
+    "login.facial.instrucao": "Position your face in front of the camera for recognition",
+    "login.facial.carregando": "Loading models...",
+    "login.facial.ativar": "Activate Camera",
+    "login.facial.reconhecer": "Recognize",
+    "login.facial.escaneando": "Scanning...",
 
     // Student Panel
     "estudante.titulo": "Student Panel",
@@ -396,9 +417,16 @@ const traducoes: Record<Idioma, Record<string, string>> = {
     "idioma.ptBR": "Portuguese (Brazil)",
     "idioma.enUS": "English (US)",
     "idioma.es": "Spanish",
+    "idioma.fr": "French",
     "idioma.selecionar": "Select language",
     "idioma.buscar": "Search language...",
     "idioma.naoEncontrado": "No language found.",
+
+    // Chatbot
+    "chatbot.titulo": "RU Assistant",
+    "chatbot.placeholder": "Type your message...",
+    "chatbot.enviar": "Send",
+    "chatbot.erro": "Sorry, I couldn't process your message.",
   },
   es: {
     // General
@@ -443,6 +471,13 @@ const traducoes: Record<Idioma, Record<string, string>> = {
     "login.qrcode.instrucao": "Posicione el código QR en el centro de la cámara para escanear",
     "login.qrcode.iniciar": "Iniciar Escaneo",
     "login.qrcode.parar": "Detener Escaneo",
+    "login.facial": "Facial",
+    "login.facial.titulo": "Login Facial",
+    "login.facial.instrucao": "Posicione su rostro frente a la cámara para reconocimiento",
+    "login.facial.carregando": "Cargando modelos...",
+    "login.facial.ativar": "Activar Cámara",
+    "login.facial.reconhecer": "Reconocer",
+    "login.facial.escaneando": "Escaneando...",
 
     // Student Panel
     "estudante.titulo": "Panel del Estudiante",
@@ -569,9 +604,240 @@ const traducoes: Record<Idioma, Record<string, string>> = {
     "idioma.ptBR": "Portugués (Brasil)",
     "idioma.enUS": "Inglés (EE.UU.)",
     "idioma.es": "Español",
+    "idioma.fr": "Francés",
     "idioma.selecionar": "Seleccionar idioma",
     "idioma.buscar": "Buscar idioma...",
     "idioma.naoEncontrado": "No se encontró ningún idioma.",
+
+    // Chatbot
+    "chatbot.titulo": "Asistente del RU",
+    "chatbot.placeholder": "Escriba su mensaje...",
+    "chatbot.enviar": "Enviar",
+    "chatbot.erro": "Lo siento, no pude procesar su mensaje.",
+  },
+  fr: {
+    // General
+    "app.nome": "Restaurant Universitaire",
+    "app.descricao": "Système de vente de déjeuners du Restaurant Universitaire",
+
+    // Navigation
+    "nav.inicio": "Accueil",
+    "nav.cardapio": "Menu",
+    "nav.sobre": "À propos",
+    "nav.entrar": "Se connecter",
+    "nav.sair": "Se déconnecter",
+    "nav.minhaConta": "Mon Compte",
+
+    // Home Page
+    "home.bemVindo": "Bienvenue au Restaurant Universitaire",
+    "home.descricao":
+      "Nous offrons des repas nutritifs et abordables pour toute la communauté académique. Achetez votre ticket de déjeuner rapidement et facilement.",
+    "home.servicos": "Nos Services",
+    "home.almoco": "Déjeuner Équilibré",
+    "home.almocoDesc": "Repas complets et nutritifs préparés quotidiennement par notre équipe.",
+    "home.compra": "Achat en Ligne",
+    "home.compraDesc": "Obtenez vos tickets rapidement et en toute sécurité via notre plateforme.",
+    "home.cardapio": "Menu Hebdomadaire",
+    "home.cardapioDesc": "Consultez le menu de la semaine et planifiez vos repas à l'avance.",
+    "home.horario": "Heures d'Ouverture",
+    "home.horarioAlmoco": "Déjeuner",
+    "home.diasFuncionamento": "Lundi au Vendredi",
+    "home.horaFuncionamento": "11h00 - 14h00",
+
+    // Login
+    "login.titulo": "Se connecter au Système",
+    "login.descricao": "Accédez à votre compte pour acheter des tickets ou gérer le système",
+    "login.credenciais": "Identifiants",
+    "login.qrcode": "Code QR",
+    "login.email": "Email",
+    "login.senha": "Mot de passe",
+    "login.lembrar": "Se souvenir de moi",
+    "login.entrar": "Se connecter",
+    "login.entrando": "Connexion...",
+    "login.suporte": "Problèmes d'accès ? Contactez le support.",
+    "login.qrcode.instrucao": "Positionnez le code QR au centre de la caméra pour scanner",
+    "login.qrcode.iniciar": "Démarrer le Scan",
+    "login.qrcode.parar": "Arrêter le Scan",
+    "login.facial": "Facial",
+    "login.facial.titulo": "Connexion Faciale",
+    "login.facial.instrucao": "Positionnez votre visage devant la caméra pour reconnaissance",
+    "login.facial.carregando": "Chargement des modèles...",
+    "login.facial.ativar": "Activer la Caméra",
+    "login.facial.reconhecer": "Reconnaître",
+    "login.facial.escaneando": "Numérisation...",
+
+    // Student Panel
+    "estudante.titulo": "Panneau Étudiant",
+    "estudante.comprar": "Acheter un Ticket",
+    "estudante.historico": "Historique",
+    "estudante.configuracoes": "Paramètres",
+    "estudante.comprarTicket": "Acheter un Ticket de Déjeuner",
+    "estudante.comprarDesc": "Obtenez votre ticket pour le déjeuner au Restaurant Universitaire",
+    "estudante.historicoCompras": "Historique des Achats",
+    "estudante.historicoDesc": "Consultez vos achats précédents",
+    "estudante.configConta": "Paramètres du Compte",
+    "estudante.configDesc": "Gérez vos préférences et paramètres d'accessibilité",
+    "estudante.prefNotificacao": "Préférences de Notification",
+    "estudante.acessibilidade": "Accessibilité",
+
+    // Ticket Purchase
+    "ticket.dataAlmoco": "Date du Déjeuner",
+    "ticket.selecioneData": "Sélectionnez une date",
+    "ticket.quantidade": "Quantité",
+    "ticket.maximo": "Maximum de 5 tickets par achat",
+    "ticket.precoUnitario": "Prix unitaire:",
+    "ticket.total": "Total:",
+    "ticket.finalizar": "Finaliser l'Achat",
+    "ticket.processando": "Traitement...",
+    "ticket.sucesso": "Achat réalisé avec succès !",
+    "ticket.sucessoDesc": "Votre ticket de déjeuner a été acheté. Vous pouvez le consulter dans votre historique d'achats.",
+    "ticket.comprarOutro": "Acheter un autre ticket",
+
+    // History
+    "historico.id": "ID",
+    "historico.data": "Date",
+    "historico.quantidade": "Quantité",
+    "historico.valorTotal": "Valeur Totale",
+    "historico.status": "Statut",
+    "historico.vazio": "Vous n'avez pas encore d'historique d'achats.",
+    "historico.pago": "Payé",
+    "historico.pendente": "En attente",
+    "historico.cancelado": "Annulé",
+
+    // Admin Panel
+    "admin.titulo": "Panneau Administrateur",
+    "admin.dashboard": "Tableau de Bord",
+    "admin.pedidos": "Commandes",
+    "admin.usuarios": "Utilisateurs",
+    "admin.dashboardVendas": "Tableau de Bord des Ventes",
+    "admin.dashboardDesc": "Consultez les statistiques et graphiques des ventes de déjeuner",
+    "admin.listaPedidos": "Liste des Commandes",
+    "admin.pedidosDesc": "Gérez les commandes passées",
+    "admin.gerenciamentoUsuarios": "Gestion des Utilisateurs",
+    "admin.usuariosDesc": "Administrez les utilisateurs du système",
+
+    // Dashboard
+    "dashboard.vendasHoje": "Total des Ventes Aujourd'hui",
+    "dashboard.valorHoje": "Valeur Totale Aujourd'hui",
+    "dashboard.mediaSemanal": "Moyenne Hebdomadaire",
+    "dashboard.ticketsVendidos": "Tickets vendus aujourd'hui",
+    "dashboard.faturamento": "Chiffre d'affaires du jour",
+    "dashboard.ticketsPorDia": "Tickets par jour (moyenne)",
+    "dashboard.vendasDiarias": "Ventes Quotidiennes",
+    "dashboard.vendasSemanais": "Ventes Hebdomadaires",
+    "dashboard.vendasPorHora": "Ventes par Heure - Aujourd'hui",
+    "dashboard.vendasPorDia": "Ventes par Jour - Cette Semaine",
+
+    // Orders
+    "pedidos.buscar": "Rechercher par ID ou nom d'utilisateur...",
+    "pedidos.usuario": "Utilisateur",
+    "pedidos.acoes": "Actions",
+    "pedidos.vazio": "Aucune commande trouvée.",
+    "pedidos.confirmado": "Confirmé",
+    "pedidos.confirmar": "Confirmer la commande",
+    "pedidos.cancelar": "Annuler la commande",
+
+    // Users
+    "usuarios.buscar": "Rechercher par nom ou email...",
+    "usuarios.novoUsuario": "Nouvel Utilisateur",
+    "usuarios.nome": "Nom",
+    "usuarios.email": "Email",
+    "usuarios.tipo": "Type",
+    "usuarios.status": "Statut",
+    "usuarios.acoes": "Actions",
+    "usuarios.vazio": "Aucun utilisateur trouvé.",
+    "usuarios.ativo": "Actif",
+    "usuarios.inativo": "Inactif",
+    "usuarios.admin": "Administrateur",
+    "usuarios.estudante": "Étudiant",
+    "usuarios.editar": "Modifier l'utilisateur",
+    "usuarios.excluir": "Supprimer l'utilisateur",
+    "usuarios.editarUsuario": "Modifier l'Utilisateur",
+    "usuarios.novoUsuarioTitulo": "Nouvel Utilisateur",
+    "usuarios.editarDesc": "Modifiez les informations de l'utilisateur ci-dessous.",
+    "usuarios.novoDesc": "Remplissez les informations pour créer un nouvel utilisateur.",
+    "usuarios.nomeCompleto": "Nom complet",
+    "usuarios.emailPlaceholder": "email@exemple.com",
+    "usuarios.senha": "Mot de passe",
+    "usuarios.selecioneTipo": "Sélectionnez le type",
+    "usuarios.selecioneStatus": "Sélectionnez le statut",
+    "usuarios.cancelar": "Annuler",
+    "usuarios.criar": "Créer",
+    "usuarios.salvar": "Sauvegarder",
+    "usuarios.salvando": "Sauvegarde...",
+
+    // Accessibility
+    "acessibilidade.altoContraste": "Haut Contraste",
+    "acessibilidade.modoEscuro": "Mode Sombre",
+    "acessibilidade.modoClaro": "Mode Clair",
+    "acessibilidade.vlibras": "VLibras",
+    "acessibilidade.irConteudo": "Aller au contenu principal",
+
+    // Footer
+    "rodape.descricao": "Offrant des repas nutritifs et abordables pour toute la communauté académique.",
+    "rodape.linksUteis": "Liens Utiles",
+    "rodape.contato": "Contact",
+    "rodape.direitos": "Tous droits réservés.",
+    "rodape.newsletter": "Newsletter",
+    "rodape.receberNoticias": "Recevez des nouvelles sur le menu et les événements",
+    "rodape.seuEmail": "Votre email",
+    "rodape.inscrever": "S'inscrire",
+    "rodape.inscritoNewsletter": "Merci de vous être inscrit !",
+    "rodape.voltarTopo": "Retour en haut",
+    "rodape.termosUso": "Conditions d'Utilisation",
+    "rodape.politicaPrivacidade": "Politique de Confidentialité",
+
+    // Languages
+    "idioma.ptBR": "Portugais (Brésil)",
+    "idioma.enUS": "Anglais (États-Unis)",
+    "idioma.es": "Espagnol",
+    "idioma.fr": "Français",
+    "idioma.selecionar": "Sélectionner la langue",
+    "idioma.buscar": "Rechercher une langue...",
+    "idioma.naoEncontrado": "Aucune langue trouvée.",
+
+    // General
+    "geral.fechar": "Fermer",
+    "geral.ajuda": "Aide",
+    "geral.voltar": "Retour",
+    "geral.avancar": "Avancer",
+    "geral.confirmar": "Confirmer",
+    "geral.cancelar": "Annuler",
+    "geral.salvar": "Sauvegarder",
+    "geral.editar": "Modifier",
+    "geral.excluir": "Supprimer",
+    "geral.adicionar": "Ajouter",
+    "geral.pesquisar": "Rechercher",
+    "geral.filtrar": "Filtrer",
+    "geral.ordenar": "Trier",
+    "geral.carregando": "Chargement...",
+    "geral.erro": "Erreur",
+    "geral.sucesso": "Succès",
+    "geral.aviso": "Avertissement",
+    "geral.info": "Information",
+
+    // Login
+    "login.sucessoLogin": "Connexion réussie !",
+    "login.mostrarSenha": "Afficher le mot de passe",
+    "login.ocultarSenha": "Masquer le mot de passe",
+    "login.ajuda.email.titulo": "Aide avec l'Email",
+    "login.ajuda.email.descricao": "Saisissez l'email que vous avez utilisé pour vous inscrire au système.",
+    "login.ajuda.senha.titulo": "Aide avec le Mot de Passe",
+    "login.ajuda.senha.descricao": "Saisissez votre mot de passe. Si vous l'avez oublié, contactez le support.",
+
+    // Home
+    "home.ajuda.servicos.titulo": "Nos Services",
+    "home.ajuda.servicos.descricao":
+      "Nous offrons divers services pour répondre aux besoins de la communauté académique. Cliquez sur chaque carte pour en savoir plus.",
+    "home.ajuda.horario.titulo": "Heures d'Ouverture",
+    "home.ajuda.horario.descricao":
+      "Le Restaurant Universitaire fonctionne du lundi au vendredi, de 11h00 à 14h00, uniquement pour le déjeuner. Nous ne servons pas de dîner.",
+
+    // Chatbot
+    "chatbot.titulo": "Assistant du RU",
+    "chatbot.placeholder": "Tapez votre message...",
+    "chatbot.enviar": "Envoyer",
+    "chatbot.erro": "Désolé, je n'ai pas pu traiter votre message.",
   },
 }
 

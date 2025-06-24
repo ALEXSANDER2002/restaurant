@@ -2,10 +2,12 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { motion, useInView } from "framer-motion"
-import { Utensils, Clock, CreditCard, Users, ChevronDown } from "lucide-react"
+import { Utensils, Clock, CreditCard, Users, ChevronDown, CheckCircle, X, Mail, Phone } from "lucide-react"
 import Link from "next/link"
-import { useRef } from "react"
+import { useRef, useEffect, useState, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 import { DepoimentosCarrossel } from "@/components/depoimentos-carrossel"
 import { HeroImage } from "@/components/hero-image"
@@ -16,7 +18,21 @@ import { cn } from "@/lib/utils"
 // Create motion versions of our components
 const MotionCard = motion(Card)
 
-export default function Home() {
+function HomePage() {
+  const searchParams = useSearchParams()
+  const qrLogin = searchParams.get('qr-login')
+  const [mostrarNotificacao, setMostrarNotificacao] = useState(false)
+
+  useEffect(() => {
+    if (qrLogin === 'success') {
+      setMostrarNotificacao(true)
+      // Esconder notificação após 10 segundos
+      const timer = setTimeout(() => {
+        setMostrarNotificacao(false)
+      }, 10000)
+      return () => clearTimeout(timer)
+    }
+  }, [qrLogin])
   const prefersReducedMotion = useReducedMotion()
   const { contraste } = useTema()
 
@@ -87,6 +103,23 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      {/* Notificação de Login QR Code */}
+      {mostrarNotificacao && (
+        <div className="fixed top-4 right-4 z-50 max-w-md">
+          <Alert className="border-green-200 bg-green-50 shadow-lg">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-700 pr-8">
+              <strong>Login QR Code realizado com sucesso!</strong> Bem-vindo de volta ao SIRUS.
+            </AlertDescription>
+            <button
+              onClick={() => setMostrarNotificacao(false)}
+              className="absolute top-2 right-2 p-1 rounded-full hover:bg-green-100 transition-colors"
+            >
+              <X className="h-4 w-4 text-green-600" />
+            </button>
+          </Alert>
+        </div>
+      )}
       {/* Hero Section - Mantém gradiente fixo */}
       <section
         className={cn(
@@ -273,6 +306,299 @@ export default function Home() {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        <section className={cn(
+          "py-24 bg-white dark:bg-gradient-to-br dark:from-[#0a1a33] dark:to-[#051224]",
+          contraste === "alto" && "bg-black"
+        )}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className={cn(
+                "text-3xl font-semibold text-[#0B2F67] dark:text-white mb-4",
+                contraste === "alto" && "text-white"
+              )}>
+                Perguntas Frequentes
+              </h2>
+              <p className={cn(
+                "text-lg text-gray-600 dark:text-white/70 max-w-2xl mx-auto",
+                contraste === "alto" && "text-white/80"
+              )}>
+                Tire suas principais dúvidas sobre o sistema SIRUS e o Restaurante Universitário
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {/* Pergunta 1 */}
+              <div className={cn(
+                "border rounded-lg overflow-hidden",
+                contraste === "alto" ? "border-white bg-black" : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+              )}>
+                <details className="group">
+                  <summary className={cn(
+                    "flex justify-between items-center p-6 cursor-pointer font-medium text-left",
+                    contraste === "alto" ? "text-white" : "text-[#0B2F67] dark:text-white"
+                  )}>
+                    Como compro tickets para o restaurante universitário?
+                    <span className="ml-4 flex-shrink-0 transform group-open:rotate-180 transition-transform">
+                      ▼
+                    </span>
+                  </summary>
+                  <div className={cn(
+                    "px-6 pb-6",
+                    contraste === "alto" ? "text-white/80" : "text-gray-600 dark:text-gray-300"
+                  )}>
+                    <p>Você pode comprar tickets através do sistema SIRUS de duas formas:</p>
+                    <ul className="list-disc ml-6 mt-2 space-y-1">
+                      <li>Acesse nossa plataforma online, faça login e compre com cartão de crédito via Mercado Pago</li>
+                      <li>Use o QR Code disponível no restaurante para acesso rápido sem login</li>
+                    </ul>
+                    <p className="mt-2">Os tickets são digitais e ficam disponíveis em sua conta para uso imediato.</p>
+                  </div>
+                </details>
+              </div>
+
+              {/* Pergunta 2 */}
+              <div className={cn(
+                "border rounded-lg overflow-hidden",
+                contraste === "alto" ? "border-white bg-black" : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+              )}>
+                <details className="group">
+                  <summary className={cn(
+                    "flex justify-between items-center p-6 cursor-pointer font-medium text-left",
+                    contraste === "alto" ? "text-white" : "text-[#0B2F67] dark:text-white"
+                  )}>
+                    Quais são os valores das refeições?
+                    <span className="ml-4 flex-shrink-0 transform group-open:rotate-180 transition-transform">
+                      ▼
+                    </span>
+                  </summary>
+                  <div className={cn(
+                    "px-6 pb-6",
+                    contraste === "alto" ? "text-white/80" : "text-gray-600 dark:text-gray-300"
+                  )}>
+                    <p>Os valores variam conforme o tipo de usuário:</p>
+                    <ul className="list-disc ml-6 mt-2 space-y-1">
+                      <li><strong>Estudantes subsidiados:</strong> R$ 2,00 por refeição</li>
+                      <li><strong>Não subsidiados e visitantes:</strong> R$ 13,00 por refeição</li>
+                    </ul>
+                    <p className="mt-2">Os preços são mantidos acessíveis graças ao subsídio da universidade para estudantes cadastrados.</p>
+                  </div>
+                </details>
+              </div>
+
+              {/* Pergunta 3 */}
+              <div className={cn(
+                "border rounded-lg overflow-hidden",
+                contraste === "alto" ? "border-white bg-black" : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+              )}>
+                <details className="group">
+                  <summary className={cn(
+                    "flex justify-between items-center p-6 cursor-pointer font-medium text-left",
+                    contraste === "alto" ? "text-white" : "text-[#0B2F67] dark:text-white"
+                  )}>
+                    Quais são os horários de funcionamento?
+                    <span className="ml-4 flex-shrink-0 transform group-open:rotate-180 transition-transform">
+                      ▼
+                    </span>
+                  </summary>
+                  <div className={cn(
+                    "px-6 pb-6",
+                    contraste === "alto" ? "text-white/80" : "text-gray-600 dark:text-gray-300"
+                  )}>
+                    <p>O Restaurante Universitário funciona:</p>
+                    <ul className="list-disc ml-6 mt-2 space-y-1">
+                      <li><strong>Segunda a Sexta:</strong> 11h00 às 14h00 (apenas almoço)</li>
+                      <li><strong>Fins de semana:</strong> Fechado</li>
+                      <li><strong>Jantar:</strong> Não oferecemos este serviço</li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
+
+              {/* Pergunta 4 */}
+              <div className={cn(
+                "border rounded-lg overflow-hidden",
+                contraste === "alto" ? "border-white bg-black" : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+              )}>
+                <details className="group">
+                  <summary className={cn(
+                    "flex justify-between items-center p-6 cursor-pointer font-medium text-left",
+                    contraste === "alto" ? "text-white" : "text-[#0B2F67] dark:text-white"
+                  )}>
+                    Como funciona o login facial?
+                    <span className="ml-4 flex-shrink-0 transform group-open:rotate-180 transition-transform">
+                      ▼
+                    </span>
+                  </summary>
+                  <div className={cn(
+                    "px-6 pb-6",
+                    contraste === "alto" ? "text-white/80" : "text-gray-600 dark:text-gray-300"
+                  )}>
+                    <p>O sistema oferece autenticação biométrica facial para maior praticidade:</p>
+                    <ul className="list-disc ml-6 mt-2 space-y-1">
+                      <li>Primeiro, faça seu cadastro facial na área do usuário</li>
+                      <li>O sistema captura e armazena características únicas do seu rosto de forma segura</li>
+                      <li>Após o cadastro, você pode fazer login apenas mostrando o rosto para a câmera</li>
+                      <li>É uma forma rápida e segura de acessar sua conta</li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
+
+              {/* Pergunta 5 */}
+              <div className={cn(
+                "border rounded-lg overflow-hidden",
+                contraste === "alto" ? "border-white bg-black" : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+              )}>
+                <details className="group">
+                  <summary className={cn(
+                    "flex justify-between items-center p-6 cursor-pointer font-medium text-left",
+                    contraste === "alto" ? "text-white" : "text-[#0B2F67] dark:text-white"
+                  )}>
+                    O que fazer se meu ticket não foi validado?
+                    <span className="ml-4 flex-shrink-0 transform group-open:rotate-180 transition-transform">
+                      ▼
+                    </span>
+                  </summary>
+                  <div className={cn(
+                    "px-6 pb-6",
+                    contraste === "alto" ? "text-white/80" : "text-gray-600 dark:text-gray-300"
+                  )}>
+                    <p>Se houver problemas com a validação do seu ticket:</p>
+                    <ul className="list-disc ml-6 mt-2 space-y-1">
+                      <li>Procure um funcionário do restaurante imediatamente</li>
+                      <li>Mostre seu QR Code na tela do celular</li>
+                      <li>Entre em contato com o suporte técnico: suporte.sirus@unifesspa.edu.br</li>
+                      <li>Ligue para (94) 2101-7041 para assistência</li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
+
+              {/* Pergunta 6 */}
+              <div className={cn(
+                "border rounded-lg overflow-hidden",
+                contraste === "alto" ? "border-white bg-black" : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+              )}>
+                <details className="group">
+                  <summary className={cn(
+                    "flex justify-between items-center p-6 cursor-pointer font-medium text-left",
+                    contraste === "alto" ? "text-white" : "text-[#0B2F67] dark:text-white"
+                  )}>
+                    Posso consultar o cardápio da semana?
+                    <span className="ml-4 flex-shrink-0 transform group-open:rotate-180 transition-transform">
+                      ▼
+                    </span>
+                  </summary>
+                  <div className={cn(
+                    "px-6 pb-6",
+                    contraste === "alto" ? "text-white/80" : "text-gray-600 dark:text-gray-300"
+                  )}>
+                    <p>Sim! O cardápio está sempre disponível:</p>
+                    <ul className="list-disc ml-6 mt-2 space-y-1">
+                      <li>Na página inicial do site você encontra o cardápio da semana atual</li>
+                      <li>O cardápio é atualizado semanalmente</li>
+                      <li>Inclui opções vegetarianas e informações nutricionais</li>
+                      <li>Você pode acessar mesmo sem fazer login</li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
+
+              {/* Pergunta 7 */}
+              <div className={cn(
+                "border rounded-lg overflow-hidden",
+                contraste === "alto" ? "border-white bg-black" : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+              )}>
+                <details className="group">
+                  <summary className={cn(
+                    "flex justify-between items-center p-6 cursor-pointer font-medium text-left",
+                    contraste === "alto" ? "text-white" : "text-[#0B2F67] dark:text-white"
+                  )}>
+                    Como criar uma conta no sistema?
+                    <span className="ml-4 flex-shrink-0 transform group-open:rotate-180 transition-transform">
+                      ▼
+                    </span>
+                  </summary>
+                  <div className={cn(
+                    "px-6 pb-6",
+                    contraste === "alto" ? "text-white/80" : "text-gray-600 dark:text-gray-300"
+                  )}>
+                    <p>Para criar sua conta no SIRUS:</p>
+                    <ul className="list-disc ml-6 mt-2 space-y-1">
+                      <li>Clique em "Cadastrar" na página inicial</li>
+                      <li>Preencha seus dados pessoais (nome, email, senha)</li>
+                      <li>Confirme sua conta através do email enviado</li>
+                      <li>Faça login e aproveite todas as funcionalidades</li>
+                    </ul>
+                    <p className="mt-2">Estudantes da UNIFESSPA têm acesso aos preços subsidiados automaticamente.</p>
+                  </div>
+                </details>
+              </div>
+
+              {/* Pergunta 8 */}
+              <div className={cn(
+                "border rounded-lg overflow-hidden",
+                contraste === "alto" ? "border-white bg-black" : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+              )}>
+                <details className="group">
+                  <summary className={cn(
+                    "flex justify-between items-center p-6 cursor-pointer font-medium text-left",
+                    contraste === "alto" ? "text-white" : "text-[#0B2F67] dark:text-white"
+                  )}>
+                    O sistema oferece suporte para pessoas com deficiência?
+                    <span className="ml-4 flex-shrink-0 transform group-open:rotate-180 transition-transform">
+                      ▼
+                    </span>
+                  </summary>
+                  <div className={cn(
+                    "px-6 pb-6",
+                    contraste === "alto" ? "text-white/80" : "text-gray-600 dark:text-gray-300"
+                  )}>
+                    <p>Sim! O SIRUS foi desenvolvido com foco em acessibilidade:</p>
+                    <ul className="list-disc ml-6 mt-2 space-y-1">
+                      <li>Integração com VLibras para tradução em Libras</li>
+                      <li>Suporte a leitores de tela</li>
+                      <li>Opção de alto contraste</li>
+                      <li>Navegação por teclado</li>
+                      <li>Textos alternativos em imagens</li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
+            </div>
+
+            {/* Contato para mais dúvidas */}
+            <div className={cn(
+              "mt-12 p-6 rounded-lg text-center",
+              contraste === "alto" ? "bg-black border-2 border-white" : "bg-gray-50 dark:bg-gray-800"
+            )}>
+              <h3 className={cn(
+                "text-lg font-semibold mb-2",
+                contraste === "alto" ? "text-white" : "text-[#0B2F67] dark:text-white"
+              )}>
+                Não encontrou sua dúvida?
+              </h3>
+              <p className={cn(
+                "mb-4",
+                contraste === "alto" ? "text-white/80" : "text-gray-600 dark:text-gray-300"
+              )}>
+                Entre em contato conosco através dos canais de suporte
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex items-center justify-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  <span className="text-sm">suporte.sirus@unifesspa.edu.br</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <span className="text-sm">(94) 2101-7041</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section
           className={cn(
@@ -331,5 +657,13 @@ export default function Home() {
         </section>
       </main>
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <HomePage />
+    </Suspense>
   )
 }

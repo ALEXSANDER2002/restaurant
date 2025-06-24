@@ -3,8 +3,8 @@ import { db } from "@/lib/drizzle"
 import { tickets } from "@/lib/drizzle/schema"
 import { eq } from "drizzle-orm"
 
-export async function PATCH(req: NextRequest, { params }: { params: { ticketId: string } }) {
-  const { ticketId } = params
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ ticketId: string }> }) {
+  const { ticketId } = await params
 
   try {
     const body = await req.json()

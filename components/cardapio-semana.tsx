@@ -23,17 +23,16 @@ interface CardapioItem {
   acompanhamentos: string
   saladas: string
   sobremesa: string
-  bebida: string
   opcao_vegetariana: string
   observacoes?: string
 }
 
 const DIAS_SEMANA = [
-  { key: 'segunda', label: 'Segunda-feira', emoji: '🌟', cor: 'bg-blue-100 text-blue-800' },
-  { key: 'terca', label: 'Terça-feira', emoji: '🔥', cor: 'bg-red-100 text-red-800' },
-  { key: 'quarta', label: 'Quarta-feira', emoji: '💚', cor: 'bg-green-100 text-green-800' },
-  { key: 'quinta', label: 'Quinta-feira', emoji: '⭐', cor: 'bg-yellow-100 text-yellow-800' },
-  { key: 'sexta', label: 'Sexta-feira', emoji: '🎉', cor: 'bg-purple-100 text-purple-800' },
+  { key: 'segunda', label: 'Segunda-feira', emoji: '🌟', cor: 'bg-[#1351B4]/10 text-[#1351B4] border-[#1351B4]' },
+  { key: 'terca', label: 'Terça-feira', emoji: '🔥', cor: 'bg-[#0B2F67]/10 text-[#0B2F67] border-[#0B2F67]' },
+  { key: 'quarta', label: 'Quarta-feira', emoji: '💚', cor: 'bg-[#2670E8]/10 text-[#2670E8] border-[#2670E8]' },
+  { key: 'quinta', label: 'Quinta-feira', emoji: '⭐', cor: 'bg-[#071D41]/10 text-[#071D41] border-[#071D41]' },
+  { key: 'sexta', label: 'Sexta-feira', emoji: '🎉', cor: 'bg-[#1351B4]/15 text-[#1351B4] border-[#1351B4]' },
 ]
 
 export function CardapioSemana() {
@@ -100,40 +99,40 @@ export function CardapioSemana() {
 
   if (carregando) {
     return (
-      <section className="py-16 bg-gradient-to-br from-orange-50 to-red-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Carregando cardápio...</p>
-          </div>
+          <section className="py-16 bg-gradient-to-br from-blue-50 to-slate-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1351B4] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Carregando cardápio...</p>
         </div>
-      </section>
+      </div>
+    </section>
     )
   }
 
   if (erro || cardapio.length === 0) {
     return (
-      <section className="py-16 bg-gradient-to-br from-orange-50 to-red-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <Utensils className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              🍽️ Cardápio da Semana
-            </h2>
-            <p className="text-gray-600 mb-6">
-              {erro || 'Cardápio não disponível no momento. Verifique novamente em breve!'}
-            </p>
-            <Button 
-              onClick={carregarCardapio}
-              variant="outline"
-              className="border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Tentar Novamente
-            </Button>
-          </div>
+          <section className="py-16 bg-gradient-to-br from-blue-50 to-slate-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center">
+          <Utensils className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-3xl font-bold text-[#0B2F67] mb-4">
+            🍽️ Cardápio da Semana
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {erro || 'Cardápio não disponível no momento. Verifique novamente em breve!'}
+          </p>
+          <Button 
+            onClick={carregarCardapio}
+            variant="outline"
+            className="border-[#1351B4] text-[#1351B4] hover:bg-[#1351B4] hover:text-white"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Tentar Novamente
+          </Button>
         </div>
-      </section>
+      </div>
+    </section>
     )
   }
 
@@ -141,11 +140,11 @@ export function CardapioSemana() {
   const cardapioDia = obterCardapioDia(diaAtivo)
 
   return (
-    <section className="py-16 bg-gradient-to-br from-orange-50 to-red-50">
+    <section className="py-16 bg-gradient-to-br from-blue-50 to-slate-50">
       <div className="container mx-auto px-4">
         {/* Cabeçalho */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl font-bold text-[#0B2F67] mb-4">
             🍽️ Cardápio da Semana
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -155,13 +154,12 @@ export function CardapioSemana() {
           
           {/* Informações dos Horários */}
           <div className="flex flex-wrap justify-center gap-4 mt-6">
-            <Badge variant="outline" className="bg-white">
+            <Badge variant="outline" className="bg-white border-[#1351B4] text-[#1351B4]">
               <Clock className="h-3 w-3 mr-1" />
               Almoço: 11h às 14h
             </Badge>
-            <Badge variant="outline" className="bg-white">
-              <Clock className="h-3 w-3 mr-1" />
-              Jantar: 17h às 19h30
+            <Badge variant="outline" className="bg-[#1351B4]/10 text-[#1351B4] border-[#1351B4]">
+              📍 Segunda a Sexta-feira
             </Badge>
           </div>
         </div>
@@ -176,8 +174,8 @@ export function CardapioSemana() {
               className={cn(
                 "text-sm font-medium transition-all",
                 diaAtivo === dia.key 
-                  ? "bg-orange-600 hover:bg-orange-700 text-white shadow-lg scale-105" 
-                  : "border-orange-200 text-orange-700 hover:bg-orange-100"
+                  ? "bg-[#1351B4] hover:bg-[#0B2F67] text-white shadow-lg scale-105" 
+                  : "border-[#1351B4] text-[#1351B4] hover:bg-[#1351B4]/10"
               )}
             >
               {dia.emoji} {dia.label.split('-')[0]}
@@ -213,10 +211,10 @@ export function CardapioSemana() {
         {/* Cardápio do Dia */}
         {cardapioDia ? (
           <Card className="max-w-4xl mx-auto shadow-2xl border-0 bg-white">
-            <CardHeader className="text-center pb-6">
+            <CardHeader className="text-center pb-6 bg-gradient-to-r from-[#0B2F67] to-[#1351B4] text-white rounded-t-lg">
               <CardTitle className="flex items-center justify-center gap-3 text-2xl">
                 {diaInfo?.emoji}
-                <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                <span className="text-white">
                   {diaInfo?.label}
                 </span>
               </CardTitle>
@@ -227,10 +225,10 @@ export function CardapioSemana() {
                 {/* Prato Principal */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-3">
-                    <Utensils className="h-5 w-5 text-orange-600" />
+                    <Utensils className="h-5 w-5 text-[#1351B4]" />
                     <h3 className="font-semibold text-gray-900">Prato Principal</h3>
                   </div>
-                  <p className="text-gray-700 bg-orange-50 p-4 rounded-lg border border-orange-100">
+                  <p className="text-gray-700 bg-[#1351B4]/5 p-4 rounded-lg border border-[#1351B4]/20">
                     {cardapioDia.prato_principal}
                   </p>
                 </div>
@@ -270,16 +268,7 @@ export function CardapioSemana() {
                   </p>
                 </div>
 
-                {/* Bebida */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Coffee className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-semibold text-gray-900">Bebida</h3>
-                  </div>
-                  <p className="text-gray-700 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    {cardapioDia.bebida}
-                  </p>
-                </div>
+
               </div>
 
               {/* Observações */}
@@ -291,22 +280,18 @@ export function CardapioSemana() {
               )}
 
               {/* Informações Nutricionais */}
-              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
-                <h3 className="font-semibold text-gray-900 mb-3 text-center">
-                  🏥 Informações Importantes
+              <div className="mt-8 p-6 bg-gradient-to-r from-[#1351B4]/5 to-[#0B2F67]/5 rounded-lg border border-[#1351B4]/20">
+                <h3 className="font-semibold text-[#0B2F67] mb-3 text-center">
+                  💰 Valores das Refeições
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                   <div className="text-center">
-                    <span className="font-medium">💰 Estudantes:</span>
-                    <br />R$ 3,00
+                    <span className="font-medium">🎓 Estudantes Subsidiados:</span>
+                    <br /><span className="text-lg font-bold text-[#1351B4]">R$ 2,00</span>
                   </div>
                   <div className="text-center">
-                    <span className="font-medium">👨‍🏫 Servidores:</span>
-                    <br />R$ 10,00
-                  </div>
-                  <div className="text-center">
-                    <span className="font-medium">👥 Visitantes:</span>
-                    <br />R$ 15,00
+                    <span className="font-medium">👥 Não Subsidiados/Visitantes:</span>
+                    <br /><span className="text-lg font-bold text-[#1351B4]">R$ 13,00</span>
                   </div>
                 </div>
               </div>

@@ -8,7 +8,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, CreditCard, AlertCircle, HelpCircle, Check, Info, Clock } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CalendarIcon, CreditCard, AlertCircle, HelpCircle, Check, Info, Clock, MapPin } from "lucide-react"
 import { format, addDays, isToday, isTomorrow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { cn } from "@/lib/utils"
@@ -35,12 +36,20 @@ const TICKET_TYPES = {
   },
 }
 
+// Opções de campus
+const CAMPUS_OPTIONS = [
+  { value: "1", label: "Campus 1", description: "Folha 31, Quadra 07, Lote Especial - Nova Marabá" },
+  { value: "2", label: "Campus 2", description: "Folha 17, Quadra 04, Lote Especial - Nova Marabá" },
+  { value: "3", label: "Campus 3", description: "Rod. BR-230, Av. dos Ipês - Cidade Jardim, Marabá" },
+]
+
 export function ComprarTicketSincronizado() {
   const { mostrarFeedback } = useFeedback()
-  const { usuario } = useAuth()
+  const { usuario, carregando: carregandoAuth } = useAuth()
   const [data, setData] = useState<Date | undefined>(undefined)
   const [quantidadeNaoSubsidiado, setQuantidadeNaoSubsidiado] = useState(0)
   const [comprarSubsidiado, setComprarSubsidiado] = useState(false)
+  const [campus, setCampus] = useState<string>("1") // Estado para o campus selecionado
   const [carregando, setCarregando] = useState(false)
   const [redirecionando, setRedirecionando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -54,21 +63,28 @@ export function ComprarTicketSincronizado() {
   const [validacoes, setValidacoes] = useState({
     dataValida: false,
     ticketSelecionado: false,
-    quantidadeValida: true
+    quantidadeValida: true,
+    campusSelecionado: true // Campus sempre tem um valor padrão
   })
 
   useEffect(() => {
     setValidacoes({
       dataValida: !!data,
       ticketSelecionado: comprarSubsidiado || quantidadeNaoSubsidiado > 0,
-      quantidadeValida: quantidadeNaoSubsidiado >= 0
+      quantidadeValida: quantidadeNaoSubsidiado >= 0,
+      campusSelecionado: !!campus
     })
-  }, [data, comprarSubsidiado, quantidadeNaoSubsidiado])
+  }, [data, comprarSubsidiado, quantidadeNaoSubsidiado, campus])
 
   const getDataDisplayText = (date: Date) => {
     if (isToday(date)) return "Hoje"
     if (isTomorrow(date)) return "Amanhã"
     return format(date, "EEEE, dd/MM", { locale: ptBR })
+  }
+
+  const getCampusLabel = (campusValue: string) => {
+    const option = CAMPUS_OPTIONS.find(c => c.value === campusValue)
+    return option ? option.label : "Campus 1"
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,6 +99,10 @@ export function ComprarTicketSincronizado() {
       setErro("🎫 Selecione pelo menos um ticket para continuar")
       return
     }
+    if (!campus) {
+      setErro("🏫 Por favor, selecione o campus para retirada")
+      return
+    }
     
     setCarregando(true)
     setRedirecionando(false)
@@ -94,15 +114,29 @@ export function ComprarTicketSincronizado() {
         return
       }
 
+      // Validação adicional dos dados do usuário
+      if (!usuario.email || !usuario.tipo_usuario) {
+        setErro("🔐 Dados de usuário incompletos. Faça login novamente.")
+        return
+      }
+
+      console.log('[FRONTEND] Iniciando checkout para usuário:', {
+        id: usuario.id,
+        email: usuario.email,
+        tipo: usuario.tipo_usuario,
+        campus: campus
+      })
+
       const resultado = await iniciarCheckout({
         usuario_id: usuario.id,
         data: (data as Date).toISOString(),
         comprarSubsidiado,
         quantidadeNaoSubsidiado,
+        campus, // Incluir o campus selecionado
       })
 
       mostrarFeedback(
-        `✅ ${resultado.tickets_criados} ticket(s) criado(s) com sucesso! Redirecionando para pagamento...`,
+        `✅ ${resultado.tickets_criados} ticket(s) criado(s) com sucesso para ${getCampusLabel(campus)}! Redirecionando para pagamento...`,
         "sucesso"
       )
 
@@ -113,7 +147,14 @@ export function ComprarTicketSincronizado() {
       }, 1500)
     } catch (error: any) {
       if (error instanceof Error && error.message) {
-        setErro(`❌ ${error.message}`)
+        const mensagem = error.message
+        
+        // Tratamento específico para erro de usuário não encontrado
+        if (mensagem.includes("Usuário não encontrado")) {
+          setErro("🔐 Sua sessão expirou ou há um problema com sua conta. Faça login novamente.")
+        } else {
+          setErro(`❌ ${mensagem}`)
+        }
       } else {
         setErro("❌ Erro ao processar a compra. Tente novamente em alguns instantes.")
       }
@@ -121,6 +162,56 @@ export function ComprarTicketSincronizado() {
     } finally {
       setCarregando(false)
     }
+  }
+
+  // Mostrar loading enquanto verifica autenticação
+  if (carregandoAuth) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
+              <CreditCard className="h-8 w-8 text-blue-600 animate-pulse" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Verificando autenticação...</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Aguarde enquanto verificamos seus dados
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Usuário não autenticado
+  if (!usuario) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="pt-6">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+              <AlertCircle className="h-8 w-8 text-red-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Login Necessário</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Você precisa estar logado para comprar tickets
+              </p>
+            </div>
+            <Button
+              onClick={() => {
+                window.location.href = "/login"
+              }}
+              className="w-full"
+            >
+              Fazer Login
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   if (redirecionando) {
@@ -160,7 +251,7 @@ export function ComprarTicketSincronizado() {
             </CardTitle>
             <CardDescription>
               Selecione a data, tipo e quantidade de tickets que deseja comprar.
-              O almoço é servido das 11h às 15h.
+              O almoço é servido das 11h às 14h, de segunda a sexta-feira.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -168,7 +259,21 @@ export function ComprarTicketSincronizado() {
         {erro && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{erro}</AlertDescription>
+            <AlertDescription className="flex flex-col gap-2">
+              <span>{erro}</span>
+              {erro.includes("sessão expirou") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    window.location.href = "/login"
+                  }}
+                  className="self-start"
+                >
+                  Fazer Login Novamente
+                </Button>
+              )}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -177,16 +282,7 @@ export function ComprarTicketSincronizado() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
-                📅 Data do Almoço
-                <Tooltip>
-                  <TooltipTrigger>
-                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Escolha o dia que deseja almoçar no restaurante universitário.<br/>
-                    Não servimos aos finais de semana.</p>
-                  </TooltipContent>
-                </Tooltip>
+                📅 Selecione a Data
                 {validacoes.dataValida && <Check className="h-4 w-4 text-green-500" />}
               </CardTitle>
             </CardHeader>
@@ -197,19 +293,11 @@ export function ComprarTicketSincronizado() {
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal h-12",
-                      !data && "text-muted-foreground",
-                      validacoes.dataValida && "border-green-500 bg-green-50"
+                      !data && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="mr-3 h-5 w-5" />
-                    {data ? (
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{getDataDisplayText(data)}</span>
-                        <Badge variant="secondary">{format(data, "dd/MM/yyyy")}</Badge>
-                      </div>
-                    ) : (
-                      <span>Clique para selecionar uma data</span>
-                    )}
+                    <CalendarIcon className="mr-2 h-5 w-5" />
+                    {data ? getDataDisplayText(data) : "Escolha uma data"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -217,20 +305,68 @@ export function ComprarTicketSincronizado() {
                     mode="single"
                     selected={data}
                     onSelect={setData}
+                    disabled={(date) => {
+                      const today = new Date()
+                      today.setHours(0, 0, 0, 0)
+                      
+                      const dateToCheck = new Date(date)
+                      dateToCheck.setHours(0, 0, 0, 0)
+                      
+                      // Não permitir datas passadas ou mais de 30 dias no futuro
+                      const maxDate = addDays(today, 30)
+                      return dateToCheck < today || dateToCheck > maxDate
+                    }}
                     initialFocus
                     locale={ptBR}
-                    disabled={(date) => {
-                      const hoje = new Date()
-                      hoje.setHours(0, 0, 0, 0)
-                      return date < hoje || date.getDay() === 0 || date.getDay() === 6
-                    }}
-                    className="rounded-md border"
                   />
                 </PopoverContent>
               </Popover>
-              <p className="text-xs text-muted-foreground mt-2">
-                💡 Só é possível comprar tickets para dias úteis (segunda a sexta)
-              </p>
+              
+              {data && (
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 text-sm text-blue-800">
+                    <Clock className="h-4 w-4" />
+                    <span className="font-medium">
+                      Almoço para {format(data, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Seleção de Campus */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                🏫 Campus para Retirada
+                {validacoes.campusSelecionado && <Check className="h-4 w-4 text-green-500" />}
+              </CardTitle>
+              <CardDescription>
+                Escolha em qual campus você irá retirar sua refeição
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select value={campus} onValueChange={setCampus}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="Selecione o campus">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      <span>{getCampusLabel(campus)} - {CAMPUS_OPTIONS.find(c => c.value === campus)?.description}</span>
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {CAMPUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{option.label}</span>
+                        <span className="text-sm text-muted-foreground">{option.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </CardContent>
           </Card>
 

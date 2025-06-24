@@ -17,6 +17,10 @@ interface TicketQRCodeProps {
     valor_total: number
     status: "pago" | "pendente" | "cancelado"
     subsidiado?: boolean
+    qr_code?: string
+    campus?: string
+    utilizado?: boolean
+    data_utilizacao?: string
   }
   onClose?: () => void
 }
@@ -39,19 +43,25 @@ export function TicketQRCode({ ticket, onClose }: TicketQRCodeProps) {
   // Dados que serão codificados no QR code
   const ticketData = {
     id: ticket.id,
+    qr_code: ticket.qr_code,
     data: ticket.data,
     quantidade: ticket.quantidade,
     status: ticket.status,
+    subsidiado: ticket.subsidiado,
+    campus: ticket.campus,
     timestamp: new Date().toISOString(), // Adiciona timestamp para segurança
   }
 
   useEffect(() => {
+    // Usar sempre o código único do ticket, nunca JSON
+    const qrCodeData = ticket.qr_code || `TICKET_${ticket.id}_${Date.now()}`
+    
+    console.log("Gerando QR code para:", qrCodeData)
+    
     // Gerar QR code usando API pública
-    const qrCodeApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-      JSON.stringify(ticketData),
-    )}`
+    const qrCodeApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCodeData)}`
     setQrCodeUrl(qrCodeApi)
-  }, [ticket.id])
+  }, [ticket.id, ticket.qr_code])
 
   // Função para baixar o QR code
   const downloadQRCode = async () => {
@@ -107,8 +117,8 @@ export function TicketQRCode({ ticket, onClose }: TicketQRCodeProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Ticket RU - ${format(parseISO(ticket.data), "dd/MM/yyyy", { locale: ptBR })}`,
-          text: `Meu ticket para o Restaurante Universitário - ${format(parseISO(ticket.data), "dd/MM/yyyy", { locale: ptBR })}`,
+          title: `Ticket RU - ${format(parseISO(ticket.data), "dd/MM/yyyy HH:mm", { locale: ptBR })}`,
+          text: `Meu ticket para o Restaurante Universitário - ${format(parseISO(ticket.data), "dd/MM/yyyy HH:mm", { locale: ptBR })}`,
           url: window.location.href,
         })
       } catch (error) {
@@ -152,15 +162,33 @@ export function TicketQRCode({ ticket, onClose }: TicketQRCodeProps) {
 
         <div className="w-full space-y-2 text-center">
           <p className="font-medium">ID: {ticket.id}</p>
-          <p>Data: {format(parseISO(ticket.data), "dd/MM/yyyy", { locale: ptBR })}</p>
+          <p>Data: {format(parseISO(ticket.data), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
           <p>Quantidade: {ticket.quantidade}</p>
           <p>Valor: R$ {formatarValor(ticket.valor_total)}</p>
           <p>Tipo: {ticket.subsidiado ? "Subsidiado" : "Não Subsidiado"}</p>
+          {ticket.campus && (
+            <p>Campus: {ticket.campus === "1" ? "Campus 1" : ticket.campus === "2" ? "Campus 2" : "Campus 3"}</p>
+          )}
+          {ticket.utilizado && (
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
+              <p className="text-red-700 font-medium">⚠️ TICKET UTILIZADO</p>
+              {ticket.data_utilizacao && (
+                <p className="text-red-600 text-sm">
+                  Usado em: {format(parseISO(ticket.data_utilizacao), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="text-xs text-center text-muted-foreground mt-4">
           <p>Apresente este QR code no Restaurante Universitário</p>
           <p>Válido apenas para a data indicada</p>
+          {ticket.qr_code && (
+            <p className="mt-1 font-mono text-xs text-gray-500">
+              Código: {ticket.qr_code.substring(0, 20)}...
+            </p>
+          )}
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-2 print:hidden">

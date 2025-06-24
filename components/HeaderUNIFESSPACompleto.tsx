@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { useTema } from "./provedor-tema";
-import { Eye, Accessibility, Contrast, Menu, X, User, Plus, Minus, RotateCcw, ChevronDown } from "lucide-react";
+import { Eye, Accessibility, Contrast, Menu, X, User, Plus, Minus, RotateCcw, ChevronDown, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { BotaoEntrar } from "./botao-entrar";
 import { BotaoSair } from "./botao-sair";
+import { SeletorIdioma } from "./seletor-idioma";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -236,6 +237,18 @@ export default function HeaderUNIFESSPACompleto() {
                           </div>
                         </div>
                         <button className="text-blue-600 hover:underline text-sm font-medium" onClick={carregarVLibras}>Acessar</button>
+                      </div>
+                      <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-5 w-5" />
+                          <div>
+                            <div className="font-medium">Idioma</div>
+                            <div className="text-xs text-gray-500">Selecionar idioma</div>
+                          </div>
+                        </div>
+                        <div className="min-w-[120px]">
+                          <SeletorIdioma />
+                        </div>
                       </div>
                       <div className="flex items-center justify-between py-2">
                         <div className="flex items-center gap-2">

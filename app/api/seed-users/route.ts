@@ -8,6 +8,7 @@ export async function POST() {
     { nome: "Administrador", email: "admin@gmail.com", senha: "admin123", tipo: "admin" },
     { nome: "Usuário", email: "user@gmail.com", senha: "12345678", tipo: "usuario" },
     { nome: "Kalleb", email: "klbs@gmail.com", senha: "12345678", tipo: "usuario" },
+    { nome: "Ana", email: "ana@gmail.com", senha: "23252013", tipo: "usuario" },
   ]
 
   try {

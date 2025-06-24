@@ -1,4 +1,4 @@
-import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
+import { MercadoPagoConfig, Payment } from 'mercadopago';
 import "server-only";
 
 // Função para obter configurações em runtime
@@ -13,171 +13,198 @@ function getConfig() {
   return { ACCESS_TOKEN, PUBLIC_KEY };
 }
 
-// Configurar cliente (apenas se o token estiver disponível)
-let client: MercadoPagoConfig | null = null;
-let preference: Preference | null = null;
-let payment: Payment | null = null;
+// Interface para dados do pagamento
+export interface CheckoutTransparenteParams {
+  transactionAmount: number;
+  description: string;
+  paymentMethodId: string;
+  token?: string; // Para cartões
+  installments?: number;
+  issuerId?: string;
+  payer: {
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    identification?: {
+      type: string;
+      number: string;
+    };
+  };
+  campus: string;
+  externalReference: string;
+}
 
-// Função para inicializar o cliente se necessário
-function initializeClient() {
-  const { ACCESS_TOKEN } = getConfig();
-  
-  if (!client && ACCESS_TOKEN) {
-    client = new MercadoPagoConfig({ 
+// Interface para resposta do pagamento
+export interface PaymentResponse {
+  id: number;
+  status: string;
+  status_detail: string;
+  transaction_amount: number;
+  description: string;
+  payment_method_id: string;
+  transaction_details?: {
+    qr_code_base64?: string;
+    qr_code?: string;
+    ticket_url?: string;
+  };
+  point_of_interaction?: {
+    transaction_data?: {
+      qr_code_base64?: string;
+      qr_code?: string;
+      ticket_url?: string;
+    };
+  };
+}
+
+// Classe principal do Mercado Pago
+export class MercadoPagoClient {
+  private client: MercadoPagoConfig;
+  private payment: Payment;
+
+  constructor() {
+    const { ACCESS_TOKEN } = getConfig();
+    
+    this.client = new MercadoPagoConfig({
       accessToken: ACCESS_TOKEN,
-      options: { 
-        timeout: 5000,
-        integratorId: process.env.MERCADO_PAGO_INTEGRATOR_ID || 'dev_24c65fb163bf11ea96500242ac130004'
-      } 
     });
     
-    preference = new Preference(client);
-    payment = new Payment(client);
+    this.payment = new Payment(this.client);
   }
-}
 
-// Interfaces simplificadas
-export interface CreatePreferenceRequest {
-  items: Array<{
-    id: string;
-    title: string;
-    quantity: number;
-    unit_price: number;
-    currency_id: string;
-    description?: string;
-  }>;
-  payer?: {
-    name?: string;
-    surname?: string;
-    email?: string;
-    phone?: {
-      area_code?: string;
-      number?: string;
-    };
-    identification?: {
-      type?: string;
-      number?: string;
-    };
-    address?: {
-      zip_code?: string;
-      street_name?: string;
-      street_number?: number;
-    };
-  };
-  back_urls?: {
-    success?: string;
-    failure?: string;
-    pending?: string;
-  };
-  auto_return?: 'approved' | 'all';
-  payment_methods?: {
-    excluded_payment_methods?: Array<{ id: string }>;
-    excluded_payment_types?: Array<{ id: string }>;
-    installments?: number;
-  };
-  notification_url?: string;
-  statement_descriptor?: string;
-  external_reference?: string;
-  expires?: boolean;
-  expiration_date_from?: string;
-  expiration_date_to?: string;
-  metadata?: Record<string, any>;
-}
-
-class MercadoPagoClient {
-  /**
-   * Cria uma preferência de pagamento (Checkout Pro)
-   */
-  async createPreference(request: any): Promise<any> {
-    initializeClient();
-    
-    if (!preference) {
-      throw new Error('Cliente do Mercado Pago não foi configurado. Verifique as credenciais.');
-    }
-
+  // Método principal para criar pagamentos
+  async createPayment(params: CheckoutTransparenteParams): Promise<PaymentResponse> {
     try {
-      console.log('[MERCADO-PAGO] Criando preferência de pagamento:', {
-        items: request.items?.length,
-        external_reference: request.external_reference
+      console.log('[MERCADO-PAGO] Criando pagamento transparente:', {
+        amount: params.transactionAmount,
+        method: params.paymentMethodId,
+        payer: params.payer.email,
+        campus: params.campus
       });
 
-      const result = await preference.create({
-        body: request
+      // Preparar dados do pagamento
+      const paymentData: any = {
+        transaction_amount: params.transactionAmount,
+        description: params.description,
+        payment_method_id: params.paymentMethodId,
+        payer: {
+          email: params.payer.email,
+          ...(params.payer.firstName && { first_name: params.payer.firstName }),
+          ...(params.payer.lastName && { last_name: params.payer.lastName }),
+          ...(params.payer.identification && { identification: params.payer.identification })
+        },
+        external_reference: params.externalReference,
+        metadata: {
+          campus: params.campus
+        }
+      };
+
+      // Se for cartão, adicionar dados específicos
+      if (params.token) {
+        paymentData.token = params.token;
+        paymentData.installments = params.installments || 1;
+        if (params.issuerId) {
+          paymentData.issuer_id = params.issuerId;
+        }
+        
+        console.log('[MERCADO-PAGO] Dados do cartão:', {
+          token: params.token,
+          installments: paymentData.installments,
+          issuer_id: paymentData.issuer_id,
+          payment_method_id: paymentData.payment_method_id
+        });
+      }
+
+      console.log('[MERCADO-PAGO] Dados finais do pagamento:', JSON.stringify(paymentData, null, 2));
+
+      // Criar o pagamento
+      const result = await this.payment.create({
+        body: paymentData,
+        requestOptions: {
+          idempotencyKey: `${params.externalReference}_${Date.now()}`
+        }
       });
 
-      console.log('[MERCADO-PAGO] Preferência criada com sucesso:', {
-        id: result.id,
-        init_point: result.init_point
-      });
+      console.log('[MERCADO-PAGO] Pagamento criado:', result.id);
 
-      return result;
+      return result as PaymentResponse;
     } catch (error: any) {
-      console.error('[MERCADO-PAGO] Erro ao criar preferência:', error);
-      throw new Error(`Erro no Mercado Pago: ${error.message}`);
+      console.error('[MERCADO-PAGO] Erro detalhado ao criar pagamento:', error);
+      
+      // Capturar detalhes específicos do erro do Mercado Pago
+      if (error.cause && Array.isArray(error.cause)) {
+        const mpErrors = error.cause.map((err: any) => `${err.code}: ${err.description}`).join(', ');
+        throw new Error(`Erro no Mercado Pago: ${mpErrors}`);
+      }
+      
+      if (error.message) {
+        throw new Error(`Erro no Mercado Pago: ${error.message}`);
+      }
+      
+      throw new Error(`Erro no Mercado Pago: ${JSON.stringify(error)}`);
     }
   }
 
-  /**
-   * Consulta um pagamento pelo ID
-   */
-  async getPayment(paymentId: string): Promise<any> {
-    initializeClient();
-    
-    if (!payment) {
-      throw new Error('Cliente do Mercado Pago não foi configurado. Verifique as credenciais.');
-    }
-
+  // Obter métodos de pagamento disponíveis
+  async getPaymentMethods() {
     try {
-      console.log('[MERCADO-PAGO] Consultando pagamento:', paymentId);
-
-      const result = await payment.get({
-        id: paymentId
+      const response = await fetch('https://api.mercadopago.com/v1/payment_methods', {
+        headers: {
+          'Authorization': `Bearer ${getConfig().ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
       });
-
-      console.log('[MERCADO-PAGO] Pagamento consultado:', {
-        id: result.id,
-        status: result.status,
-        external_reference: result.external_reference
-      });
-
-      return result;
-    } catch (error: any) {
-      console.error('[MERCADO-PAGO] Erro ao consultar pagamento:', error);
-      throw new Error(`Erro no Mercado Pago: ${error.message}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('[MERCADO-PAGO] Métodos de pagamento obtidos:', data);
+      
+      return data;
+    } catch (error) {
+      console.error('[MERCADO-PAGO] Erro ao obter métodos de pagamento:', error);
+      throw error;
     }
   }
 
-  /**
-   * Busca uma preferência pelo ID
-   */
-  async getPreference(preferenceId: string): Promise<any> {
-    initializeClient();
-    
-    if (!preference) {
-      throw new Error('Cliente do Mercado Pago não foi configurado. Verifique as credenciais.');
-    }
-
+  // Obter tipos de documento
+  async getIdentificationTypes() {
     try {
-      console.log('[MERCADO-PAGO] Consultando preferência:', preferenceId);
-
-      const result = await preference.get({
-        preferenceId: preferenceId
+      const response = await fetch('https://api.mercadopago.com/v1/identification_types', {
+        headers: {
+          'Authorization': `Bearer ${getConfig().ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('[MERCADO-PAGO] Tipos de documento obtidos:', data);
+      
+      return data;
+    } catch (error) {
+      console.error('[MERCADO-PAGO] Erro ao obter tipos de documento:', error);
+      throw error;
+    }
+  }
 
-      console.log('[MERCADO-PAGO] Preferência consultada:', {
-        id: result.id,
-        external_reference: result.external_reference
-      });
-
-      return result;
-    } catch (error: any) {
-      console.error('[MERCADO-PAGO] Erro ao consultar preferência:', error);
-      throw new Error(`Erro no Mercado Pago: ${error.message}`);
+  // Obter detalhes do pagamento
+  async getPayment(paymentId: string): Promise<PaymentResponse> {
+    try {
+      const result = await this.payment.get({ id: paymentId });
+      return result as PaymentResponse;
+    } catch (error) {
+      console.error('[MERCADO-PAGO] Erro ao obter pagamento:', error);
+      throw error;
     }
   }
 }
 
-// Instância do cliente
+// Instância singleton
 export const mercadoPagoClient = new MercadoPagoClient();
 
 // Exportar constantes úteis

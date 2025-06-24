@@ -1,106 +1,137 @@
-import type { Ticket } from "./ticket-sync-service"
+import { mercadoPagoClient, CheckoutTransparenteParams, PaymentResponse } from './mercado-pago-client'
 
 export interface CheckoutParams {
   usuario_id: string
-  data: string
-  comprarSubsidiado: boolean
-  quantidadeNaoSubsidiado: number
+  data: Date
+  quantidadeSubsidiado?: number
+  quantidadeNaoSubsidiado?: number
+  campus: string
+  // Dados específicos do checkout transparente
+  paymentMethod: string
+  token?: string // Para cartões
+  installments?: number
+  issuerId?: string
+  payer: {
+    email: string
+    firstName?: string
+    lastName?: string
+    identification?: {
+      type: string
+      number: string
+    }
+  }
 }
 
-export interface CheckoutResponse {
-  checkout_url: string
-  preference_id: string
-  external_id: string
-  valor_total: number
-  descricao: string
-  tickets_criados: number
+export interface CheckoutResult {
+  success: boolean
+  paymentId?: number
+  status?: string
+  statusDetail?: string
+  qrCode?: string
+  qrCodeBase64?: string
+  ticketUrl?: string
+  error?: string
 }
 
-export interface CheckoutError {
-  erro: string
-  detalhes?: string
-}
-
-export async function iniciarCheckout(params: CheckoutParams): Promise<CheckoutResponse> {
+export async function iniciarCheckout(params: CheckoutParams): Promise<CheckoutResult> {
   try {
-    console.log('[CHECKOUT-SERVICE] Iniciando checkout:', params)
+    console.log('[CHECKOUT] Iniciando checkout transparente:', {
+      usuario: params.usuario_id,
+      data: params.data,
+      quantidadeSubsidiado: params.quantidadeSubsidiado,
+      quantidadeNaoSubsidiado: params.quantidadeNaoSubsidiado,
+      campus: params.campus,
+      paymentMethod: params.paymentMethod
+    })
+
+    // Calcular valores
+    const PRECO_SUBSIDIADO = 5.00
+    const PRECO_NAO_SUBSIDIADO = 15.00
     
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify(params),
+    const valorSubsidiado = (params.quantidadeSubsidiado || 0) * PRECO_SUBSIDIADO
+    const valorNaoSubsidiado = (params.quantidadeNaoSubsidiado || 0) * PRECO_NAO_SUBSIDIADO
+    const valorTotal = valorSubsidiado + valorNaoSubsidiado
+    
+    const quantidadeTotal = (params.quantidadeSubsidiado || 0) + (params.quantidadeNaoSubsidiado || 0)
+
+    // Preparar descrição
+    let descricao = `Tickets RU - Campus ${params.campus}`
+    if (params.quantidadeSubsidiado && params.quantidadeNaoSubsidiado) {
+      descricao += ` (${params.quantidadeSubsidiado} subsidiado${params.quantidadeSubsidiado > 1 ? 's' : ''}, ${params.quantidadeNaoSubsidiado} não subsidiado${params.quantidadeNaoSubsidiado > 1 ? 's' : ''})`
+    } else if (params.quantidadeSubsidiado) {
+      descricao += ` (${params.quantidadeSubsidiado} subsidiado${params.quantidadeSubsidiado > 1 ? 's' : ''})`
+    } else if (params.quantidadeNaoSubsidiado) {
+      descricao += ` (${params.quantidadeNaoSubsidiado} não subsidiado${params.quantidadeNaoSubsidiado > 1 ? 's' : ''})`
+    }
+
+    // Preparar dados do pagamento
+    const paymentData: CheckoutTransparenteParams = {
+      transactionAmount: valorTotal,
+      description: descricao,
+      paymentMethodId: params.paymentMethod,
+      token: params.token,
+      installments: params.installments,
+      issuerId: params.issuerId,
+      payer: params.payer,
+      campus: params.campus,
+      externalReference: `ticket_${params.usuario_id}_${Date.now()}`
+    }
+
+    // Criar pagamento
+    const payment = await mercadoPagoClient.createPayment(paymentData)
+
+    console.log('[CHECKOUT] Pagamento criado:', {
+      id: payment.id,
+      status: payment.status,
+      method: payment.payment_method_id
     })
 
-    // Verificar se a resposta é JSON válido
-    let json: any
-    try {
-      json = await res.json()
-    } catch (parseError) {
-      console.error('[CHECKOUT-SERVICE] Erro ao fazer parse da resposta:', parseError)
-      throw new Error("Erro de comunicação com o servidor")
+    // Preparar resposta baseada no tipo de pagamento
+    const result: CheckoutResult = {
+      success: true,
+      paymentId: payment.id,
+      status: payment.status,
+      statusDetail: payment.status_detail
     }
 
-    console.log('[CHECKOUT-SERVICE] Resposta recebida:', {
-      status: res.status,
-      sucesso: json.sucesso,
-      erro: json.erro
-    })
-
-    if (!res.ok) {
-      // Tratar diferentes tipos de erro HTTP
-      if (res.status === 400) {
-        throw new Error(json.erro || "Dados de entrada inválidos")
-      } else if (res.status === 404) {
-        throw new Error(json.erro || "Usuário não encontrado")
-      } else if (res.status === 500) {
-        throw new Error(json.erro || "Erro interno do servidor")
-      } else {
-        throw new Error(json.erro || `Erro HTTP ${res.status}`)
-      }
+    // Se for PIX, adicionar dados específicos
+    if (params.paymentMethod === 'pix') {
+      result.qrCode = payment.point_of_interaction?.transaction_data?.qr_code
+      result.qrCodeBase64 = payment.point_of_interaction?.transaction_data?.qr_code_base64
+      result.ticketUrl = payment.point_of_interaction?.transaction_data?.ticket_url
     }
 
-    if (!json.sucesso) {
-      console.error('[CHECKOUT-SERVICE] Checkout falhou:', json.erro)
-      throw new Error(json.erro || "Erro ao processar checkout")
-    }
+    return result
 
-    // Validar campos obrigatórios na resposta
-    if (!json.checkout_url) {
-      console.error('[CHECKOUT-SERVICE] URL de checkout não recebida')
-      throw new Error("URL de pagamento não foi gerada")
-    }
-
-    if (!json.preference_id) {
-      console.error('[CHECKOUT-SERVICE] ID da preferência não recebido')
-      throw new Error("ID da preferência não foi gerado")
-    }
-
-    console.log('[CHECKOUT-SERVICE] Checkout concluído com sucesso:', {
-      preference_id: json.preference_id,
-      valor_total: json.valor_total,
-      tickets_criados: json.tickets_criados
-    })
-
+  } catch (error: any) {
+    console.error('[CHECKOUT] Erro no checkout:', error)
+    
     return {
-      checkout_url: json.checkout_url,
-      preference_id: json.preference_id,
-      external_id: json.external_id,
-      valor_total: json.valor_total,
-      descricao: json.descricao,
-      tickets_criados: json.tickets_criados
+      success: false,
+      error: error.message || 'Erro interno do servidor'
     }
+  }
+}
 
-  } catch (error) {
-    console.error('[CHECKOUT-SERVICE] Erro no checkout:', error)
-    
-    // Re-throw o erro para o componente frontend lidar
-    if (error instanceof Error) {
-      throw error
-    } else {
-      throw new Error("Erro desconhecido ao processar checkout")
-    }
+// Função para obter métodos de pagamento
+export async function obterMetodosPagamento() {
+  try {
+    const methods = await mercadoPagoClient.getPaymentMethods()
+    return methods.filter((method: any) => 
+      ['credit_card', 'debit_card', 'pix', 'bolbradesco'].includes(method.id)
+    )
+  } catch (error: any) {
+    console.error('[CHECKOUT] Erro ao obter métodos de pagamento:', error)
+    throw error
+  }
+}
+
+// Função para obter tipos de documento
+export async function obterTiposDocumento() {
+  try {
+    return await mercadoPagoClient.getIdentificationTypes()
+  } catch (error: any) {
+    console.error('[CHECKOUT] Erro ao obter tipos de documento:', error)
+    throw error
   }
 } 

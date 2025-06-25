@@ -1,12 +1,8 @@
 # Dockerfile para Restaurant System - Produção
-FROM node:18-alpine
+FROM node:18-alpine3.18
 
 # Instalar dependências do sistema necessárias
-RUN apk add --no-cache \
-    curl \
-    netcat-openbsd \
-    bash \
-    && rm -rf /var/cache/apk/*
+RUN apk add --no-cache curl bash netcat-openbsd
 
 # Criar usuário não-root para segurança
 RUN addgroup -g 1001 -S nodejs

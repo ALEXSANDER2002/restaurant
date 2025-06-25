@@ -1,6 +1,11 @@
 # Dockerfile para Restaurant System - Produção
 FROM node:18-alpine3.18
 
+# Configurar repositórios Alpine com mirror confiável
+RUN echo "http://mirrors.aliyun.com/alpine/v3.18/main" > /etc/apk/repositories && \
+    echo "http://mirrors.aliyun.com/alpine/v3.18/community" >> /etc/apk/repositories && \
+    apk update
+
 # Instalar dependências do sistema necessárias
 RUN apk add --no-cache curl bash netcat-openbsd
 

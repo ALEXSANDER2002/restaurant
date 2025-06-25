@@ -1,29 +1,28 @@
 # Dockerfile para Restaurant System - Produção
 FROM node:18-alpine3.18
 
-# Configurar repositórios Alpine com mirror confiável
-RUN echo "http://mirrors.aliyun.com/alpine/v3.18/main" > /etc/apk/repositories && \
-    echo "http://mirrors.aliyun.com/alpine/v3.18/community" >> /etc/apk/repositories && \
-    apk update
-
-# Instalar dependências do sistema necessárias
-RUN apk add --no-cache curl bash netcat-openbsd
+# Atualizar repositórios e instalar dependências
+RUN apk update && apk add --no-cache \
+    libc6-compat \
+    postgresql-client \
+    curl \
+    bash
 
 # Criar usuário não-root para segurança
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
-# Diretório de trabalho
+# Configurar diretório de trabalho
 WORKDIR /app
 
+# Copiar package files
+COPY package.json pnpm-lock.yaml ./
+
 # Instalar pnpm globalmente
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copiar arquivos de dependências primeiro (para cache do Docker)
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-
-# Instalar dependências em modo de produção
-RUN pnpm install --frozen-lockfile --prod=false
+# Instalar dependências
+RUN pnpm install --frozen-lockfile
 
 # Copiar código fonte
 COPY . .
@@ -31,8 +30,8 @@ COPY . .
 # Gerar cliente Drizzle (importante para as migrações)
 RUN pnpm db:gen
 
-# Build da aplicação Next.js
-RUN pnpm build
+# Build da aplicação
+RUN pnpm run build
 
 # Copiar e dar permissão ao script de entrada
 COPY scripts/docker-start.sh /usr/local/bin/docker-start.sh

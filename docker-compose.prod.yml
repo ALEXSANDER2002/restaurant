@@ -1,92 +1,125 @@
-version: '3.8'
+# docker-compose.prod.yml - Configuração para Produção Hostinger
+# Para usar: docker compose -f docker-compose.prod.yml up -d
 
 services:
   # Banco PostgreSQL
   postgres:
-    image: postgres:15
-    container_name: restaurant_postgres
+    image: postgres:15-alpine
+    container_name: sirus_postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: restaurant
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sirus_postgres_2024!}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - sirus-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d restaurant"]
+      interval: 10s
+      timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
   # Aplicação Next.js
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: restaurant_app
+      args:
+        - NODE_ENV=production
+    container_name: sirus_app
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/restaurant
+      # Banco de dados
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-sirus_postgres_2024!}@postgres:5432/restaurant
+      
+      # Aplicação
       NODE_ENV: production
-      NEXT_TELEMETRY_DISABLED: 1
-      APP_URL: http://localhost:3000
-      NEXTAUTH_URL: http://localhost:3000
-      NEXTAUTH_SECRET: sua_chave_secreta_123456789
+      PORT: 3000
+      
+      # URLs (ALTERE PARA SEU DOMÍNIO)
+      APP_URL: ${APP_URL:-https://seudominio.com}
+      NEXTAUTH_URL: ${APP_URL:-https://seudominio.com}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-sirus_secret_super_seguro_2024_hostinger_production_key}
+      
+      # Mercado Pago (ALTERE PARA PRODUÇÃO)
+      MERCADO_PAGO_ACCESS_TOKEN: ${MERCADO_PAGO_ACCESS_TOKEN:-TEST-8615861957158765-062220-17a5b9caeb28c62cb27b06bf8296df7a-450378695}
+      MERCADO_PAGO_PUBLIC_KEY: ${MERCADO_PAGO_PUBLIC_KEY:-TEST-1cff22c1-f4ea-4ea9-a009-345710763660}
+      NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY: ${MERCADO_PAGO_PUBLIC_KEY:-TEST-1cff22c1-f4ea-4ea9-a009-345710763660}
+      MERCADO_PAGO_CLIENT_ID: ${MERCADO_PAGO_CLIENT_ID:-8658884450610340}
+      MERCADO_PAGO_CLIENT_SECRET: ${MERCADO_PAGO_CLIENT_SECRET:-CK4Xo24WusntZm0F0Tc7XXiwwEIkIuKH}
+      MERCADO_PAGO_WEBHOOK_SECRET: ${MERCADO_PAGO_WEBHOOK_SECRET:-dfcc6e97deb787c5a7ae92027ec3bc451c2c9c88af0aba98f45d300a5325cd46}
+      
+      # Google Gemini
+      GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY:-AIzaSyAP0gGdFkjc_nQrJFexH4uXdznmCKM_faI}
+      
+      # Segurança
+      TRUST_PROXY: 1
+      SECURE_COOKIES: true
+      
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - sirus-network
+    volumes:
+      - ./uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/session"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # Nginx Proxy Reverso
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: sirus_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/certs:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - sirus-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
 volumes:
   postgres_data:
     driver: local
 
-# Nginx para proxy reverso em produção
-nginx:
-  image: nginx:alpine
-  container_name: restaurant_nginx_prod
-  restart: unless-stopped
-  ports:
-    - "80:80"
-    - "443:443"
-  volumes:
-    - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    - ./ssl:/etc/nginx/ssl:ro
-    - nginx_cache:/var/cache/nginx
-  depends_on:
-    app:
-      condition: service_healthy
-  networks:
-    - restaurant_network
-  healthcheck:
-    test: ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
-    interval: 30s
-    timeout: 10s
-    retries: 3
-
-# Watchtower para atualizações automáticas (opcional)
-watchtower:
-  image: containrrr/watchtower
-  container_name: restaurant_watchtower
-  restart: unless-stopped
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-  environment:
-    - WATCHTOWER_POLL_INTERVAL=300
-    - WATCHTOWER_CLEANUP=true
-    - WATCHTOWER_INCLUDE_STOPPED=true
-  command: --interval 300 restaurant_app_prod restaurant_nginx_prod
-  # Descomente se quiser atualizações automáticas
-  # profiles:
-  #   - watchtower
-
-volumes:
-  nginx_cache:
-    driver: local
-
 networks:
-  restaurant_network:
-    driver: bridge 
+  sirus-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16 

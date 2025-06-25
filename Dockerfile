@@ -1,29 +1,51 @@
-# Dockerfile simples - apenas funcional
-FROM node:18
+# Dockerfile para Restaurant System - Produção
+FROM node:18-alpine
+
+# Instalar dependências do sistema necessárias
+RUN apk add --no-cache \
+    curl \
+    netcat-openbsd \
+    bash \
+    && rm -rf /var/cache/apk/*
+
+# Criar usuário não-root para segurança
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
 
 # Diretório de trabalho
 WORKDIR /app
 
-# Instalar pnpm
+# Instalar pnpm globalmente
 RUN npm install -g pnpm
 
-# Copiar arquivos de dependências
-COPY package.json pnpm-lock.yaml ./
+# Copiar arquivos de dependências primeiro (para cache do Docker)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Instalar todas as dependências
-RUN pnpm install
+# Instalar dependências em modo de produção
+RUN pnpm install --frozen-lockfile --prod=false
 
-# Copiar todo o código
+# Copiar código fonte
 COPY . .
 
-# Gerar cliente Drizzle
+# Gerar cliente Drizzle (importante para as migrações)
 RUN pnpm db:gen
 
 # Build da aplicação Next.js
 RUN pnpm build
 
-# Expor porta
+# Copiar e dar permissão ao script de entrada
+COPY scripts/docker-start.sh /usr/local/bin/docker-start.sh
+RUN chmod +x /usr/local/bin/docker-start.sh
+
+# Criar diretório para uploads e dar permissões
+RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads
+
+# Mudar propriedade dos arquivos para o usuário nodejs
+RUN chown -R nextjs:nodejs /app /usr/local/bin/docker-start.sh
+USER nextjs
+
+# Expor porta da aplicação
 EXPOSE 3000
 
-# Comando para iniciar
-CMD ["pnpm", "start"] 
+# Usar script de entrada personalizado
+CMD ["/usr/local/bin/docker-start.sh"] 

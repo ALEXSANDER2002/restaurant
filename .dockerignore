@@ -1,48 +1,55 @@
-# Dependencies
+# Dependências
 node_modules
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
-# Next.js build outputs
+# Arquivos Next.js de desenvolvimento
 .next/
 out/
 
-# Production build
-dist
-build
+# Arquivos de ambiente (serão passados via docker-compose)
+.env*
+!.env.example
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Git
+.git
+.gitignore
+README.md
+*.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Logs
 logs
 *.log
 
-# Runtime data
+# Runtime
 pids
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
-coverage
-*.lcov
-
-# nyc test coverage
+# Coverage
+coverage/
 .nyc_output
 
 # Dependency directories
-node_modules/
 jspm_packages/
-
-# TypeScript cache
-*.tsbuildinfo
 
 # Optional npm cache directory
 .npm
@@ -69,49 +76,99 @@ jspm_packages/
 .cache
 .parcel-cache
 
-# Next.js cache
-.next/
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Temporary folders
+tmp/
+temp/
+
+# SSL certificates (se houver)
+ssl/
+*.pem
+*.key
+*.crt
+
+# Uploads locais (serão montados como volume)
+uploads/
+
+# Arquivos de teste
+scripts/test-*
+__tests__/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# Production build
+dist
+build
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+*.lcov
+
+# Dependency directories
+node_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional eslint cache
+.eslintrc*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Backup files
+*.backup
+*.bak
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 
 # Nuxt.js build / generate output
 .nuxt
 dist
 
 # Storybook build outputs
-.out
 .storybook-out
 
-# Temporary folders
-tmp/
-temp/
-
 # IDE files
-.vscode/
-.idea/
 *.swp
 *.swo
 *~
 
 # OS generated files
-.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db
-
-# Git
-.git
-.gitignore
-README.md
-
-# Docker
-Dockerfile*
-docker-compose*
-.dockerignore
 
 # Testing
-coverage/
 .jest/
 
 # Linting

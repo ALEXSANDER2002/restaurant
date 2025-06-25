@@ -1,16 +1,25 @@
-# Dockerfile para Restaurant System - Produção
-FROM node:18-alpine3.18
+# Base image - Ubuntu para melhor compatibilidade
+FROM ubuntu:20.04
 
-# Atualizar repositórios e instalar dependências
-RUN apk update && apk add --no-cache \
-    libc6-compat \
-    postgresql-client \
+# Configurar timezone para evitar prompt interativo
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/Sao_Paulo
+
+# Instalar Node.js 18 e dependências
+RUN apt-get update && apt-get install -y \
     curl \
-    bash
+    bash \
+    postgresql-client \
+    ca-certificates \
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Criar usuário não-root para segurança
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+RUN groupadd -g 1001 nodejs \
+    && useradd -r -u 1001 -g nodejs nextjs
 
 # Configurar diretório de trabalho
 WORKDIR /app
@@ -27,25 +36,22 @@ RUN pnpm install --frozen-lockfile
 # Copiar código fonte
 COPY . .
 
-# Gerar cliente Drizzle (importante para as migrações)
+# Gerar Drizzle
 RUN pnpm db:gen
 
 # Build da aplicação
 RUN pnpm run build
 
 # Copiar e dar permissão ao script de entrada
-COPY scripts/docker-start.sh /usr/local/bin/docker-start.sh
-RUN chmod +x /usr/local/bin/docker-start.sh
+COPY scripts/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Criar diretório para uploads e dar permissões
-RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads
-
-# Mudar propriedade dos arquivos para o usuário nodejs
-RUN chown -R nextjs:nodejs /app /usr/local/bin/docker-start.sh
+# Mudar para usuário não-root
 USER nextjs
 
-# Expor porta da aplicação
+# Exposição da porta
 EXPOSE 3000
 
-# Usar script de entrada personalizado
-CMD ["/usr/local/bin/docker-start.sh"] 
+# Comando de inicialização
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["pnpm", "start"] 

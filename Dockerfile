@@ -1,59 +1,53 @@
-# Base image - Node.js oficial com Debian slim
-FROM node:18-slim
-
-# Configurar timezone
-ENV TZ=America/Sao_Paulo
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Instalar apenas o essencial - postgresql-client
-RUN apt-get update || true && \
-    apt-get install -y postgresql-client curl bash || true && \
-    apt-get clean || true && \
-    rm -rf /var/lib/apt/lists/* || true
-
-# Criar usuário não-root para segurança
-RUN groupadd -g 1001 nodejs || true && \
-    useradd -r -u 1001 -g nodejs nextjs || true
-
-# Configurar diretório de trabalho
+# Etapa 1: Build da aplicação
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Instalar pnpm globalmente (node:18 já tem corepack)
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Instala pnpm globalmente
+RUN npm install -g pnpm
 
-# Copiar package files
+# Copia os arquivos de dependências
 COPY package.json pnpm-lock.yaml ./
 
-# Instalar dependências com timeout maior
-RUN pnpm config set network-timeout 300000 && \
-    pnpm install --frozen-lockfile || \
-    (sleep 10 && pnpm install --frozen-lockfile)
+# Instala as dependências
+RUN pnpm store prune && pnpm install --frozen-lockfile
 
-# Copiar código fonte
+# Copia o restante do código
 COPY . .
 
-# Gerar Drizzle
-RUN pnpm db:gen || echo "Warning: db:gen failed, but continuing..."
+# Gera o cliente Drizzle
+RUN pnpm db:gen
 
-# Build da aplicação
-RUN pnpm run build
+# Build da aplicação Next.js
+RUN pnpm build
 
-# Copiar e dar permissão ao script de entrada
-COPY scripts/docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Etapa 2: Runner para produção
+FROM node:20-alpine AS runner
+WORKDIR /app
 
-# Criar diretório uploads
-RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app
+# Instala pnpm globalmente
+RUN npm install -g pnpm
 
-# Mudar propriedade dos arquivos
-RUN chown -R nextjs:nodejs /app
+# Copia apenas os arquivos necessários para rodar a aplicação
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/next.config.mjs ./next.config.mjs
+COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/lib ./lib
+COPY --from=builder /app/components ./components
+COPY --from=builder /app/contexts ./contexts
+COPY --from=builder /app/hooks ./hooks
+COPY --from=builder /app/services ./services
+COPY --from=builder /app/types ./types
+COPY --from=builder /app/styles ./styles
+COPY --from=builder /app/uploads ./uploads
 
-# Mudar para usuário não-root
-USER nextjs
+# Instala apenas dependências de produção
+RUN pnpm install --prod --frozen-lockfile
 
-# Exposição da porta
+# Porta padrão do Next.js
 EXPOSE 3000
 
-# Comando de inicialização
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+# Comando para iniciar a aplicação
 CMD ["pnpm", "start"] 

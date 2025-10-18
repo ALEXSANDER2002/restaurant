@@ -30,6 +30,7 @@
     "deploy:hostinger": "bash scripts/deploy-hostinger.sh",
     "create:admin": "node scripts/create-admin.js",
     "create:admin-test": "node scripts/create-admin.js --test",
+    "gerar:hash": "node scripts/gerar-hash-sha256.js",
     "backup:db": "docker-compose -f docker-compose.prod.yml exec postgres pg_dump -U postgres restaurant > backup_$(date +%Y%m%d_%H%M%S).sql",
     "logs:prod": "docker-compose -f docker-compose.prod.yml logs -f",
     "status:prod": "docker-compose -f docker-compose.prod.yml ps",

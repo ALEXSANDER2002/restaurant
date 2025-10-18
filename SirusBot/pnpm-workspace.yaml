@@ -1,0 +1,8 @@
+ignoredBuiltDependencies:
+  - core-js
+  - keccak
+  - scrypt
+  - secp256k1
+  - sha3
+  - sharp
+  - websocket

@@ -1,0 +1,141 @@
+# Docker Compose para Arquitetura de Microserviços SIRUS
+# 
+# Serviços:
+# - sirusbot (porta 3001) - Microserviço de Chatbot
+# - siruspag (porta 3000) - Microserviço de Pagamentos
+# - postgres (porta 5432) - Banco de dados
+# - ollama (porta 11434) - Modelo de IA local
+
+version: '3.8'
+
+services:
+  # ========================================
+  # PostgreSQL Database
+  # ========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: sirus-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-siruspag_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-senha123}
+      POSTGRES_DB: ${POSTGRES_DB:-siruspag}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-siruspag_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sirus-network
+
+  # ========================================
+  # Ollama (IA Local)
+  # ========================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sirus-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - sirus-network
+
+  # ========================================
+  # SirusBot - Microserviço de Chatbot
+  # ========================================
+  sirusbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sirus-bot
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: ${NODE_ENV:-production}
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma:2b}
+      SIRUSPAG_API_URL: http://siruspag:3000/api
+      MICROSERVICE_AUTH_TOKEN: ${MICROSERVICE_AUTH_TOKEN:-seu_token_secreto}
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - sirus-network
+    restart: unless-stopped
+
+  # ========================================
+  # SirusPag - Microserviço de Pagamentos
+  # ========================================
+  siruspag:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sirus-pag
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-siruspag_user}:${POSTGRES_PASSWORD:-senha123}@postgres:5432/${POSTGRES_DB:-siruspag}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
+      MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY}
+      NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY}
+      SIRUSBOT_API_URL: http://sirusbot:3001/api
+      MICROSERVICE_AUTH_TOKEN: ${MICROSERVICE_AUTH_TOKEN:-seu_token_secreto}
+      JWT_SECRET: ${JWT_SECRET:-jwt_secret_aqui}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      sirusbot:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - sirus-network
+    restart: unless-stopped
+
+# ========================================
+# Networks
+# ========================================
+networks:
+  sirus-network:
+    driver: bridge
+    name: sirus-network
+
+# ========================================
+# Volumes
+# ========================================
+volumes:
+  postgres_data:
+    name: sirus-postgres-data
+  ollama_data:
+    name: sirus-ollama-data
+  uploads_data:
+    name: sirus-uploads-data
+

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "perfis_email_unique" ON "perfis" ("email");

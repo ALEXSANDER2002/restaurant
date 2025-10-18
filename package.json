@@ -4,9 +4,9 @@
   "description": "SirusBot - Assistente Virtual Inteligente para UNIFESSPA",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3001",
     "lint": "next lint",
     "setup:ollama": "node scripts/setup-ollama.js",
     "test:gemma": "node scripts/test-gemma-migration.js"

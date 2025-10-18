@@ -1,114 +1,170 @@
-# 🍽️ Sistema SIRUS - Restaurante Universitário
+# 🤖 SirusBot - Assistente Virtual Inteligente
 
-Sistema integrado de gerenciamento de tickets, cardápio e assistente virtual para o Restaurante Universitário da UNIFESSPA.
+Chatbot inteligente com IA para atendimento e suporte ao Restaurante Universitário da UNIFESSPA.
 
-## 📦 Módulos
-
-Este projeto está organizado em dois módulos principais:
-
-- **SirusBot** 🤖 - Assistente virtual inteligente com chatbot e análise de conversas
-- **SirusPag** 💳 - Sistema de pagamentos, tickets e gestão do restaurante
+> **Nota**: Esta é a branch **SirusBot** que contém apenas o módulo do chatbot. Para o sistema completo, veja a branch `main`.
 
 ## 🚀 Tecnologias
 
 - **Next.js 15** - Framework React
 - **TypeScript** - Linguagem tipada
-- **PostgreSQL** - Banco de dados
-- **Mercado Pago** - Pagamentos
-- **Ollama/Gemma** - Chatbot IA
+- **Ollama/Gemma** - Modelo de IA local
+- **MCP (Model Context Protocol)** - Orquestração de conversas
 - **Tailwind CSS** - Estilização
+
+## 📦 Funcionalidades
+
+### 🧠 Inteligência Artificial
+- **Gemma Chat Service** - Motor de conversação com IA
+- **MCP Orchestrator** - Gerenciamento de contexto e diálogos
+- **Dialog Manager** - Gerenciamento de conversas
+- **Entity Extraction** - Extração de entidades das mensagens
+- **Intent Recognition** - Reconhecimento de intenções do usuário
+
+### 📊 Analytics
+- **Chat Analytics** - Análise de conversas e métricas
+- **Dashboard de Analytics** - Visualização de dados do chatbot
+
+### 💬 Interface
+- **Chat Bot Component** - Interface de chat moderna
+- **Demo Chat** - Página de demonstração do chatbot
 
 ## 📋 Pré-requisitos
 
 - Node.js 18+
 - pnpm
-- PostgreSQL
+- Ollama (para execução local do modelo Gemma)
 
 ## ⚙️ Instalação
 
 ```bash
-# Clone o repositório
-git clone https://github.com/ALEXSANDER2002/restaurant.git
-cd restaurant
+# Clone o repositório na branch SirusBot
+git clone -b SirusBot https://github.com/ALEXSANDER2002/restaurant.git sirusbot
+cd sirusbot
 
 # Instale as dependências
 pnpm install
 
-# Configure o arquivo .env com suas credenciais
+# Configure o Ollama (necessário para o chatbot)
+./scripts/setup-ollama.js
 
-# Execute as migrações
-pnpm drizzle-kit push
-
-# Inicie o servidor
+# Inicie o servidor de desenvolvimento
 pnpm dev
 ```
 
 Acesse: `http://localhost:3000`
 
-## 🐳 Docker
+## 🔧 Configuração do Ollama
+
+O SirusBot usa o Ollama para executar o modelo Gemma localmente:
 
 ```bash
-# Desenvolvimento
-docker-compose up -d
+# Instalar Ollama (Linux/Mac)
+curl -fsSL https://ollama.com/install.sh | sh
 
-# Produção
-docker-compose -f docker-compose.prod.yml up -d
+# Instalar Ollama (Windows)
+# Baixe de: https://ollama.com/download
+
+# Baixar o modelo Gemma
+ollama pull gemma:2b
+
+# Verificar instalação
+ollama list
 ```
 
-## 🌳 Gerenciamento de Branches
+## 🌐 Estrutura do Projeto
 
-Este projeto usa uma estratégia de branches para organizar o desenvolvimento:
-
-### Branches Disponíveis
-
-- **main** - Branch principal com código completo e estável
-- **SirusBot** - Desenvolvimento do módulo de chatbot
-- **SirusPag** - Desenvolvimento do módulo de pagamentos
-
-### Scripts Helper
-
-#### Windows (PowerShell):
-```powershell
-# Mudar para branch do chatbot
-.\scripts\gerenciar-branches.ps1 chatbot
-
-# Mudar para branch de pagamentos
-.\scripts\gerenciar-branches.ps1 pagamentos
-
-# Mudar para branch main
-.\scripts\gerenciar-branches.ps1 main
-
-# Sincronizar todas as branches com main
-.\scripts\gerenciar-branches.ps1 sync
-
-# Ver status das branches
-.\scripts\gerenciar-branches.ps1 status
+```
+sirusbot/
+├── app/
+│   ├── api/chat/          # API de conversação
+│   ├── demo-chatbot/      # Página de demonstração
+│   └── page.tsx           # Página principal
+├── components/
+│   ├── chat-bot.tsx       # Componente principal do chat
+│   ├── chat-analytics-dashboard.tsx
+│   └── demo-chat-unifesspa.tsx
+├── services/
+│   ├── gemma-chat-service.ts
+│   ├── chat-analytics-service.ts
+│   └── mcp/               # Model Context Protocol
+│       ├── dialog-manager.service.ts
+│       ├── entity-extraction.service.ts
+│       ├── intent-recognition.service.ts
+│       └── mcp-orchestrator.service.ts
+├── hooks/
+│   ├── use-chatbot.ts
+│   └── use-chat-analytics.ts
+└── types/
+    └── mcp.types.ts
 ```
 
-#### Linux/Mac (Bash):
+## 🎯 Uso
+
+### Integração do Chatbot
+
+```tsx
+import { ChatBot } from '@/components/chat-bot'
+
+export default function MyPage() {
+  return (
+    <div>
+      <ChatBot />
+    </div>
+  )
+}
+```
+
+### Uso do Hook
+
+```tsx
+import { useChatbot } from '@/hooks/use-chatbot'
+
+export default function MyComponent() {
+  const { messages, sendMessage, isLoading } = useChatbot()
+  
+  return (
+    // Sua implementação
+  )
+}
+```
+
+## 📊 Analytics
+
+O SirusBot inclui sistema de analytics para monitorar:
+- Total de conversas
+- Mensagens por dia
+- Taxa de satisfação
+- Intents mais comuns
+- Tempo médio de resposta
+
+Acesse o dashboard em: `/demo-chatbot`
+
+## 🔗 Outras Branches
+
+- **main** - Sistema completo (Chatbot + Pagamentos)
+- **SirusPag** - Módulo de pagamentos e gestão do restaurante
+
+## 🤝 Contribuindo
+
 ```bash
-# Tornar o script executável (primeira vez)
-chmod +x scripts/gerenciar-branches.sh
+# Criar feature branch
+git checkout -b feature/nova-funcionalidade
 
-# Mudar para branch do chatbot
-./scripts/gerenciar-branches.sh chatbot
+# Fazer commit
+git commit -m "feat(chatbot): adicionar nova funcionalidade"
 
-# Mudar para branch de pagamentos
-./scripts/gerenciar-branches.sh pagamentos
-
-# Mudar para branch main
-./scripts/gerenciar-branches.sh main
-
-# Sincronizar todas as branches com main
-./scripts/gerenciar-branches.sh sync
-
-# Ver status das branches
-./scripts/gerenciar-branches.sh status
+# Push
+git push origin feature/nova-funcionalidade
 ```
 
-### Workflow de Desenvolvimento
+## 📝 Convenção de Commits
 
-Para mais detalhes sobre a estratégia de branches, convenções de commit e boas práticas, consulte o arquivo `BRANCHING_STRATEGY.md`.
+- `feat(chatbot):` - Nova funcionalidade
+- `fix(chatbot):` - Correção de bug
+- `refactor(chatbot):` - Refatoração
+- `docs:` - Documentação
+- `test:` - Testes
 
 ## 📝 Licença
 
